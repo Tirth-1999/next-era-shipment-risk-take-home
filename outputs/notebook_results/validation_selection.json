@@ -1,0 +1,99 @@
+{
+  "rule": "Improve validation AP and Brier over constant; choose simplest within 0.002 Brier of best eligible; otherwise constant",
+  "selected_model": "logistic_regression",
+  "simplicity_order": [
+    "constant",
+    "logistic_regression",
+    "shallow_tree",
+    "random_forest",
+    "gradient_boosting"
+  ],
+  "split": {
+    "cohort_rule": "60/20/20 by shipment first decision time; ties assigned by time",
+    "completeness_assumption": "Reports complete for horizons ending >=48h before the specified label cutoff; not guaranteed by input",
+    "grace_hours": 48,
+    "lookback_hours": 3,
+    "observation_cutoff": "2026-03-17T11:00:00+00:00",
+    "source_sha256": {
+      "decision_times.jsonl": "6b101d088add123ef2242efb02eb0574f7a52dddbb918ca927c051fec70d45e8",
+      "events.jsonl": "2ce178c72e6d4c2e95c46eeff010abe677dd667fb58881612ad414ad24afad98",
+      "labels.jsonl": "351bad0c44975e00c6db7b7b5701a3d53739b78c4c3318a4174d2895186a06f0"
+    },
+    "test_start": "2026-03-02T08:00:00+00:00",
+    "validation_start": "2026-02-15T08:00:00+00:00"
+  },
+  "threshold": 0.2,
+  "threshold_role": "Fixed teaching comparison only; not a deployment choice",
+  "validation_results": [
+    {
+      "average_precision": 0.06862745098039216,
+      "brier": 0.06395895681437537,
+      "false_negative": 21,
+      "false_positive": 0,
+      "log_loss": 0.2503791647413136,
+      "model": "constant",
+      "positives": 21,
+      "precision_at_0_2": null,
+      "recall_at_0_2": 0.0,
+      "rows": 306,
+      "true_negative": 285,
+      "true_positive": 0
+    },
+    {
+      "average_precision": 0.9633699633699633,
+      "brier": 0.005327875661969285,
+      "false_negative": 1,
+      "false_positive": 1,
+      "log_loss": 0.03078096324146813,
+      "model": "logistic_regression",
+      "positives": 21,
+      "precision_at_0_2": 0.9523809523809523,
+      "recall_at_0_2": 0.9523809523809523,
+      "rows": 306,
+      "true_negative": 284,
+      "true_positive": 20
+    },
+    {
+      "average_precision": 0.9369889369889369,
+      "brier": 0.006474228719184466,
+      "false_negative": 2,
+      "false_positive": 0,
+      "log_loss": 0.0362422839454082,
+      "model": "shallow_tree",
+      "positives": 21,
+      "precision_at_0_2": 1.0,
+      "recall_at_0_2": 0.9047619047619048,
+      "rows": 306,
+      "true_negative": 285,
+      "true_positive": 19
+    },
+    {
+      "average_precision": 0.9519400352733687,
+      "brier": 0.008833446216963553,
+      "false_negative": 2,
+      "false_positive": 1,
+      "log_loss": 0.0456159726514595,
+      "model": "random_forest",
+      "positives": 21,
+      "precision_at_0_2": 0.95,
+      "recall_at_0_2": 0.9047619047619048,
+      "rows": 306,
+      "true_negative": 284,
+      "true_positive": 19
+    },
+    {
+      "average_precision": 0.9817927170868346,
+      "brier": 0.005789374811981138,
+      "false_negative": 2,
+      "false_positive": 0,
+      "log_loss": 0.023874010007622872,
+      "model": "gradient_boosting",
+      "positives": 21,
+      "precision_at_0_2": 1.0,
+      "recall_at_0_2": 0.9047619047619048,
+      "rows": 306,
+      "true_negative": 285,
+      "true_positive": 19
+    }
+  ]
+}

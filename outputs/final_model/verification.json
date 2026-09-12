@@ -1,0 +1,28 @@
+{
+  "pytest": "20 passed",
+  "sample_replay": {
+    "predictions.jsonl": {
+      "byte_identical": true,
+      "sha256": "96b7680a441c5bace7bee92aca4903d827a6dd5646351ad86fd9f0ae8f78ff6f",
+      "bytes": 3175766
+    },
+    "snapshot.json": {
+      "byte_identical": true,
+      "sha256": "c1740de0e03c3f0def3fce93cf867e4fc7c9bd866a9e01077bb694f9eb3987c1",
+      "bytes": 131133
+    }
+  },
+  "unseen_stream": {
+    "seed": 1927,
+    "shipments": 700,
+    "deliveries": 12881,
+    "capacity": 32
+  },
+  "serving_without_site_packages": true,
+  "python_version": "3.14.6",
+  "limitations": [
+    "3.11 not separately tested",
+    "Exact replay verified on same runtime",
+    "48-hour completeness remains an assumption"
+  ]
+}

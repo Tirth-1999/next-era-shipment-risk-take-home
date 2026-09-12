@@ -1,0 +1,57 @@
+{
+  "constant_test": {
+    "average_precision": 0.08090614886731391,
+    "brier": 0.07437994291270464,
+    "false_negative": 25,
+    "false_positive": 0,
+    "log_loss": 0.2811133004091304,
+    "positives": 25,
+    "precision_at_0_2": null,
+    "recall_at_0_2": 0.0,
+    "rows": 309,
+    "true_negative": 284,
+    "true_positive": 0
+  },
+  "development_rows": 1386,
+  "selected_model": "logistic_regression",
+  "selection_rule": "Improve validation AP and Brier over constant; choose simplest within 0.002 Brier of best eligible; otherwise constant",
+  "split": {
+    "cohort_rule": "60/20/20 by shipment first decision time; ties assigned by time",
+    "completeness_assumption": "Reports complete for horizons ending >=48h before the specified label cutoff; not guaranteed by input",
+    "grace_hours": 48,
+    "lookback_hours": 3,
+    "observation_cutoff": "2026-03-17T11:00:00+00:00",
+    "source_sha256": {
+      "decision_times.jsonl": "6b101d088add123ef2242efb02eb0574f7a52dddbb918ca927c051fec70d45e8",
+      "events.jsonl": "2ce178c72e6d4c2e95c46eeff010abe677dd667fb58881612ad414ad24afad98",
+      "labels.jsonl": "351bad0c44975e00c6db7b7b5701a3d53739b78c4c3318a4174d2895186a06f0"
+    },
+    "test_start": "2026-03-02T08:00:00+00:00",
+    "validation_start": "2026-02-15T08:00:00+00:00"
+  },
+  "test": {
+    "average_precision": 0.981276595744681,
+    "brier": 0.0037602447750589058,
+    "false_negative": 1,
+    "false_positive": 0,
+    "log_loss": 0.02084727472597418,
+    "positives": 25,
+    "precision_at_0_2": 1.0,
+    "recall_at_0_2": 0.96,
+    "rows": 309,
+    "true_negative": 284,
+    "true_positive": 24
+  },
+  "uncertainty": {
+    "ap_valid_replicates": 300,
+    "average_precision_95_range": [
+      0.939207995951417,
+      1.0000000000000002
+    ],
+    "brier_95_range": [
+      0.000285894710075891,
+      0.010140251368121817
+    ],
+    "method": "300 shipment bootstrap replicates, seed 1729, percentile range; fixed-period approximation"
+  }
+}

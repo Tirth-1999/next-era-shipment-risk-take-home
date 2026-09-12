@@ -1,0 +1,15 @@
+numpy>=2.0
+pandas>=2.2
+scikit-learn>=1.6
+threadpoolctl>=3.5
+
+[dev]
+pytest>=8.0
+
+[notebook]
+ipykernel>=6.29
+nbclient>=0.10
+pandas>=2.2
+numpy>=2.0
+scikit-learn>=1.6
+joblib>=1.4

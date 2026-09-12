@@ -1,0 +1,45 @@
+{
+  "checksums": {
+    "feature_runtime.py": "6dc280dbd368a159eb002f76f770f20cd518cca0a72364308c52628cb2145b02",
+    "model.joblib": "0f391054c5084d296010a0671019b628d33dd168844c6cf225888e6ed706f532"
+  },
+  "dependencies": {
+    "joblib": "1.6.0",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "python": "3.14.6",
+    "sklearn": "1.9.1"
+  },
+  "feature_clock_policy": "Exclude device_time later than received_at; latest by device time; lookback (left,right]",
+  "feature_order": [
+    "latest_temperature_c",
+    "measurement_age_minutes",
+    "arrival_delay_minutes",
+    "temperature_missing",
+    "temperature_count",
+    "temperature_mean_c",
+    "temperature_max_c",
+    "temperature_trend_c_per_hour",
+    "temperature_span_hours"
+  ],
+  "lookback_hours": 3,
+  "model_fit_cutoff": "2026-03-02T08:00:00+00:00",
+  "model_name": "logistic_regression",
+  "model_version": "850ef35205f9b03988a6",
+  "reporting_grace_hours": 48,
+  "schema_version": 1,
+  "split": {
+    "cohort_rule": "60/20/20 by shipment first decision time; ties assigned by time",
+    "completeness_assumption": "Reports complete for horizons ending >=48h before the specified label cutoff; not guaranteed by input",
+    "grace_hours": 48,
+    "lookback_hours": 3,
+    "observation_cutoff": "2026-03-17T11:00:00+00:00",
+    "source_sha256": {
+      "decision_times.jsonl": "6b101d088add123ef2242efb02eb0574f7a52dddbb918ca927c051fec70d45e8",
+      "events.jsonl": "2ce178c72e6d4c2e95c46eeff010abe677dd667fb58881612ad414ad24afad98",
+      "labels.jsonl": "351bad0c44975e00c6db7b7b5701a3d53739b78c4c3318a4174d2895186a06f0"
+    },
+    "test_start": "2026-03-02T08:00:00+00:00",
+    "validation_start": "2026-02-15T08:00:00+00:00"
+  }
+}

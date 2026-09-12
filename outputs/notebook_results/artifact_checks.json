@@ -1,0 +1,9 @@
+{
+  "damaged_artifact_rejected": true,
+  "duplicate_invariance": true,
+  "fresh_process_exact_match": true,
+  "future_correction_invariance": true,
+  "historical_permutation_invariance": true,
+  "new_generated_stream_scored": true,
+  "public_risk_engine_tested": false
+}

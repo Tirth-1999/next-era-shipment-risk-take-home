@@ -1,0 +1,2955 @@
+{
+  "checkpoints": [
+    {
+      "decision_time": "2026-01-01T08:00:00Z",
+      "shipment_id": "s-00000"
+    },
+    {
+      "decision_time": "2026-01-07T14:00:00Z",
+      "shipment_id": "s-00050"
+    },
+    {
+      "decision_time": "2026-01-13T20:00:00Z",
+      "shipment_id": "s-00100"
+    },
+    {
+      "decision_time": "2026-01-20T02:00:00Z",
+      "shipment_id": "s-00150"
+    },
+    {
+      "decision_time": "2026-01-26T08:00:00Z",
+      "shipment_id": "s-00200"
+    },
+    {
+      "decision_time": "2026-02-01T14:00:00Z",
+      "shipment_id": "s-00250"
+    },
+    {
+      "decision_time": "2026-02-07T20:00:00Z",
+      "shipment_id": "s-00300"
+    },
+    {
+      "decision_time": "2026-02-14T02:00:00Z",
+      "shipment_id": "s-00350"
+    },
+    {
+      "decision_time": "2026-02-20T08:00:00Z",
+      "shipment_id": "s-00400"
+    },
+    {
+      "decision_time": "2026-02-26T14:00:00Z",
+      "shipment_id": "s-00450"
+    },
+    {
+      "decision_time": "2026-03-04T20:00:00Z",
+      "shipment_id": "s-00500"
+    },
+    {
+      "decision_time": "2026-03-11T02:00:00Z",
+      "shipment_id": "s-00550"
+    }
+  ],
+  "events": [
+    {
+      "device_time": "2026-01-01T03:00:00Z",
+      "event_id": "s-00000-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T03:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 3.737
+    },
+    {
+      "device_time": "2026-01-01T01:00:00Z",
+      "event_id": "s-00000-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T01:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 3.505
+    },
+    {
+      "device_time": "2026-01-01T02:00:00Z",
+      "event_id": "s-00000-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T02:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 3.786
+    },
+    {
+      "device_time": "2026-01-01T00:00:00Z",
+      "event_id": "s-00000-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T00:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 4.224
+    },
+    {
+      "device_time": "2026-01-01T04:00:00Z",
+      "event_id": "s-00000-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T04:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 3.399
+    },
+    {
+      "device_time": "2026-01-01T04:00:00Z",
+      "event_id": "s-00000-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T04:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 3.399
+    },
+    {
+      "device_time": "2026-01-01T05:00:00Z",
+      "event_id": "s-00000-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T05:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 5.038
+    },
+    {
+      "device_time": "2026-01-01T06:00:00Z",
+      "event_id": "s-00000-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T06:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 4.687
+    },
+    {
+      "device_time": "2026-01-01T07:00:00Z",
+      "event_id": "s-00000-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T07:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 3.798
+    },
+    {
+      "device_time": "2026-01-01T10:00:00Z",
+      "event_id": "s-00000-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T10:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 5.386
+    },
+    {
+      "device_time": "2026-01-01T08:00:00Z",
+      "event_id": "s-00000-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T11:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 3.908
+    },
+    {
+      "device_time": "2026-01-01T11:00:00Z",
+      "event_id": "s-00000-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T11:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 5.926
+    },
+    {
+      "device_time": "2026-01-01T11:00:00Z",
+      "event_id": "s-00000-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T11:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 5.926
+    },
+    {
+      "device_time": "2026-01-01T09:00:00Z",
+      "event_id": "s-00000-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T12:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 4.667
+    },
+    {
+      "device_time": "2026-01-01T12:00:00Z",
+      "event_id": "s-00000-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T12:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 7.632
+    },
+    {
+      "device_time": "2026-01-01T13:00:00Z",
+      "event_id": "s-00000-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T13:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 9.444
+    },
+    {
+      "device_time": "2026-01-01T14:00:00Z",
+      "event_id": "s-00000-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T14:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 9.857
+    },
+    {
+      "device_time": "2026-01-01T15:00:00Z",
+      "event_id": "s-00000-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-01T15:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 9.658
+    },
+    {
+      "device_time": "2026-01-01T09:00:00Z",
+      "event_id": "s-00000-ticket",
+      "kind": "door_open",
+      "payload": {
+        "firmware": null
+      },
+      "received_at": "2026-01-01T17:20:00Z",
+      "revision": 1,
+      "shipment_id": "s-00000",
+      "source": "ops-console",
+      "value": 1.0
+    },
+    {
+      "device_time": "2026-01-01T08:00:00Z",
+      "event_id": "s-00000-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "correction": "calibrated",
+        "firmware": "4.8.1"
+      },
+      "received_at": "2026-01-01T19:00:00Z",
+      "revision": 2,
+      "shipment_id": "s-00000",
+      "source": "sensor-north",
+      "value": 1.658
+    },
+    {
+      "device_time": "2026-01-07T06:00:00Z",
+      "event_id": "s-00050-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T06:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 3.434
+    },
+    {
+      "device_time": "2026-01-07T07:00:00Z",
+      "event_id": "s-00050-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T07:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 4.229
+    },
+    {
+      "device_time": "2026-01-07T09:00:00Z",
+      "event_id": "s-00050-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T09:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 3.495
+    },
+    {
+      "device_time": "2026-01-07T10:00:00Z",
+      "event_id": "s-00050-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T10:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 3.371
+    },
+    {
+      "device_time": "2026-01-07T10:00:00Z",
+      "event_id": "s-00050-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T10:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 3.371
+    },
+    {
+      "device_time": "2026-01-07T08:00:00Z",
+      "event_id": "s-00050-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T11:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 3.434
+    },
+    {
+      "device_time": "2026-01-07T11:00:00Z",
+      "event_id": "s-00050-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T11:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 4.301
+    },
+    {
+      "device_time": "2026-01-07T12:00:00Z",
+      "event_id": "s-00050-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T12:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 5.029
+    },
+    {
+      "device_time": "2026-01-07T13:00:00Z",
+      "event_id": "s-00050-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T13:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 4.682
+    },
+    {
+      "device_time": "2026-01-07T14:00:00Z",
+      "event_id": "s-00050-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T14:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 4.37
+    },
+    {
+      "device_time": "2026-01-07T15:00:00Z",
+      "event_id": "s-00050-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T15:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 3.976
+    },
+    {
+      "device_time": "2026-01-07T16:00:00Z",
+      "event_id": "s-00050-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T16:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 5.357
+    },
+    {
+      "device_time": "2026-01-07T17:00:00Z",
+      "event_id": "s-00050-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T17:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 6.898
+    },
+    {
+      "device_time": "2026-01-07T17:00:00Z",
+      "event_id": "s-00050-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T17:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 6.898
+    },
+    {
+      "device_time": "2026-01-07T19:00:00Z",
+      "event_id": "s-00050-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T19:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 8.709
+    },
+    {
+      "device_time": "2026-01-07T20:00:00Z",
+      "event_id": "s-00050-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T20:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 9.805
+    },
+    {
+      "device_time": "2026-01-07T18:00:00Z",
+      "event_id": "s-00050-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-07T21:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 7.038
+    },
+    {
+      "device_time": "2026-01-07T15:00:00Z",
+      "event_id": "s-00050-ticket",
+      "kind": "door_open",
+      "payload": {
+        "firmware": null
+      },
+      "received_at": "2026-01-07T23:33:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "ops-console",
+      "value": 1.0
+    },
+    {
+      "device_time": "2026-01-07T21:00:00Z",
+      "event_id": "s-00050-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-08T00:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00050",
+      "source": "sensor-coast",
+      "value": 11.623
+    },
+    {
+      "device_time": "2026-01-13T12:00:00Z",
+      "event_id": "s-00100-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T12:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 3.384
+    },
+    {
+      "device_time": "2026-01-13T13:00:00Z",
+      "event_id": "s-00100-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T13:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.153
+    },
+    {
+      "device_time": "2026-01-13T15:00:00Z",
+      "event_id": "s-00100-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T15:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 3.156
+    },
+    {
+      "device_time": "2026-01-13T16:00:00Z",
+      "event_id": "s-00100-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T16:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 3.877
+    },
+    {
+      "device_time": "2026-01-13T16:00:00Z",
+      "event_id": "s-00100-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T16:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 3.877
+    },
+    {
+      "device_time": "2026-01-13T14:00:00Z",
+      "event_id": "s-00100-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T17:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.942
+    },
+    {
+      "device_time": "2026-01-13T17:00:00Z",
+      "event_id": "s-00100-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T17:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.244
+    },
+    {
+      "device_time": "2026-01-13T18:00:00Z",
+      "event_id": "s-00100-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T18:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.311
+    },
+    {
+      "device_time": "2026-01-13T20:00:00Z",
+      "event_id": "s-00100-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T20:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.799
+    },
+    {
+      "device_time": "2026-01-13T21:00:00Z",
+      "event_id": "s-00100-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T21:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.749
+    },
+    {
+      "device_time": "2026-01-13T19:00:00Z",
+      "event_id": "s-00100-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T22:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 5.022
+    },
+    {
+      "device_time": "2026-01-13T22:00:00Z",
+      "event_id": "s-00100-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-13T22:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.784
+    },
+    {
+      "device_time": "2026-01-14T00:00:00Z",
+      "event_id": "s-00100-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-14T00:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 5.178
+    },
+    {
+      "device_time": "2026-01-14T01:00:00Z",
+      "event_id": "s-00100-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-14T01:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.4
+    },
+    {
+      "device_time": "2026-01-13T23:00:00Z",
+      "event_id": "s-00100-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-14T02:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.563
+    },
+    {
+      "device_time": "2026-01-13T23:00:00Z",
+      "event_id": "s-00100-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-14T02:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.563
+    },
+    {
+      "device_time": "2026-01-14T02:00:00Z",
+      "event_id": "s-00100-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-14T02:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 4.766
+    },
+    {
+      "device_time": "2026-01-14T03:00:00Z",
+      "event_id": "s-00100-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-14T03:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00100",
+      "source": "sensor-central",
+      "value": 5.028
+    },
+    {
+      "device_time": "2026-01-19T18:00:00Z",
+      "event_id": "s-00150-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-19T18:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 4.391
+    },
+    {
+      "device_time": "2026-01-19T19:00:00Z",
+      "event_id": "s-00150-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-19T19:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 4.438
+    },
+    {
+      "device_time": "2026-01-19T20:00:00Z",
+      "event_id": "s-00150-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-19T20:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 4.044
+    },
+    {
+      "device_time": "2026-01-19T21:00:00Z",
+      "event_id": "s-00150-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-19T21:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 3.119
+    },
+    {
+      "device_time": "2026-01-19T22:00:00Z",
+      "event_id": "s-00150-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-19T22:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 3.861
+    },
+    {
+      "device_time": "2026-01-19T22:00:00Z",
+      "event_id": "s-00150-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-19T22:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 3.861
+    },
+    {
+      "device_time": "2026-01-19T23:00:00Z",
+      "event_id": "s-00150-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-19T23:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 4.248
+    },
+    {
+      "device_time": "2026-01-20T00:00:00Z",
+      "event_id": "s-00150-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T00:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 4.473
+    },
+    {
+      "device_time": "2026-01-20T01:00:00Z",
+      "event_id": "s-00150-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T01:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 3.838
+    },
+    {
+      "device_time": "2026-01-20T02:00:00Z",
+      "event_id": "s-00150-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T02:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 3.767
+    },
+    {
+      "device_time": "2026-01-20T03:00:00Z",
+      "event_id": "s-00150-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T03:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 4.289
+    },
+    {
+      "device_time": "2026-01-20T04:00:00Z",
+      "event_id": "s-00150-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T04:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 6.301
+    },
+    {
+      "device_time": "2026-01-20T06:00:00Z",
+      "event_id": "s-00150-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T06:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 7.644
+    },
+    {
+      "device_time": "2026-01-20T07:00:00Z",
+      "event_id": "s-00150-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T07:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 8.667
+    },
+    {
+      "device_time": "2026-01-20T05:00:00Z",
+      "event_id": "s-00150-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T08:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 6.623
+    },
+    {
+      "device_time": "2026-01-20T05:00:00Z",
+      "event_id": "s-00150-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T08:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 6.623
+    },
+    {
+      "device_time": "2026-01-20T08:00:00Z",
+      "event_id": "s-00150-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T08:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 9.74
+    },
+    {
+      "device_time": "2026-01-20T09:00:00Z",
+      "event_id": "s-00150-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-20T09:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "sensor-north",
+      "value": 10.152
+    },
+    {
+      "device_time": "2026-01-20T03:00:00Z",
+      "event_id": "s-00150-ticket",
+      "kind": "door_open",
+      "payload": {
+        "firmware": null
+      },
+      "received_at": "2026-01-20T11:22:00Z",
+      "revision": 1,
+      "shipment_id": "s-00150",
+      "source": "ops-console",
+      "value": 1.0
+    },
+    {
+      "device_time": "2026-01-26T00:00:00Z",
+      "event_id": "s-00200-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T00:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 3.635
+    },
+    {
+      "device_time": "2026-01-26T03:00:00Z",
+      "event_id": "s-00200-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T03:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.136
+    },
+    {
+      "device_time": "2026-01-26T01:00:00Z",
+      "event_id": "s-00200-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T04:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 3.405
+    },
+    {
+      "device_time": "2026-01-26T02:00:00Z",
+      "event_id": "s-00200-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T05:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 3.658
+    },
+    {
+      "device_time": "2026-01-26T05:00:00Z",
+      "event_id": "s-00200-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T05:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.452
+    },
+    {
+      "device_time": "2026-01-26T06:00:00Z",
+      "event_id": "s-00200-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T06:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 3.781
+    },
+    {
+      "device_time": "2026-01-26T04:00:00Z",
+      "event_id": "s-00200-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T07:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 2.808
+    },
+    {
+      "device_time": "2026-01-26T04:00:00Z",
+      "event_id": "s-00200-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T07:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 2.808
+    },
+    {
+      "device_time": "2026-01-26T07:00:00Z",
+      "event_id": "s-00200-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T07:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 3.578
+    },
+    {
+      "device_time": "2026-01-26T08:00:00Z",
+      "event_id": "s-00200-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T08:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.321
+    },
+    {
+      "device_time": "2026-01-26T09:00:00Z",
+      "event_id": "s-00200-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T09:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.079
+    },
+    {
+      "device_time": "2026-01-26T10:00:00Z",
+      "event_id": "s-00200-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T10:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.843
+    },
+    {
+      "device_time": "2026-01-26T11:00:00Z",
+      "event_id": "s-00200-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T11:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.494
+    },
+    {
+      "device_time": "2026-01-26T11:00:00Z",
+      "event_id": "s-00200-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T11:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.494
+    },
+    {
+      "device_time": "2026-01-26T12:00:00Z",
+      "event_id": "s-00200-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T12:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.134
+    },
+    {
+      "device_time": "2026-01-26T13:00:00Z",
+      "event_id": "s-00200-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T13:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 5.794
+    },
+    {
+      "device_time": "2026-01-26T14:00:00Z",
+      "event_id": "s-00200-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T14:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 5.924
+    },
+    {
+      "device_time": "2026-01-26T15:00:00Z",
+      "event_id": "s-00200-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-01-26T18:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00200",
+      "source": "sensor-coast",
+      "value": 4.712
+    },
+    {
+      "device_time": "2026-02-01T06:00:00Z",
+      "event_id": "s-00250-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T06:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.798
+    },
+    {
+      "device_time": "2026-02-01T08:00:00Z",
+      "event_id": "s-00250-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T08:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 4.712
+    },
+    {
+      "device_time": "2026-02-01T09:00:00Z",
+      "event_id": "s-00250-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T09:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.85
+    },
+    {
+      "device_time": "2026-02-01T07:00:00Z",
+      "event_id": "s-00250-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T10:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.386
+    },
+    {
+      "device_time": "2026-02-01T10:00:00Z",
+      "event_id": "s-00250-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T10:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.637
+    },
+    {
+      "device_time": "2026-02-01T10:00:00Z",
+      "event_id": "s-00250-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T10:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.637
+    },
+    {
+      "device_time": "2026-02-01T11:00:00Z",
+      "event_id": "s-00250-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T11:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.989
+    },
+    {
+      "device_time": "2026-02-01T12:00:00Z",
+      "event_id": "s-00250-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T12:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.881
+    },
+    {
+      "device_time": "2026-02-01T13:00:00Z",
+      "event_id": "s-00250-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T13:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 4.025
+    },
+    {
+      "device_time": "2026-02-01T14:00:00Z",
+      "event_id": "s-00250-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T14:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 3.781
+    },
+    {
+      "device_time": "2026-02-01T15:00:00Z",
+      "event_id": "s-00250-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T15:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 4.643
+    },
+    {
+      "device_time": "2026-02-01T16:00:00Z",
+      "event_id": "s-00250-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T16:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 4.748
+    },
+    {
+      "device_time": "2026-02-01T17:00:00Z",
+      "event_id": "s-00250-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T17:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 5.077
+    },
+    {
+      "device_time": "2026-02-01T17:00:00Z",
+      "event_id": "s-00250-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T17:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 5.077
+    },
+    {
+      "device_time": "2026-02-01T19:00:00Z",
+      "event_id": "s-00250-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T19:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 4.701
+    },
+    {
+      "device_time": "2026-02-01T20:00:00Z",
+      "event_id": "s-00250-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T20:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 5.827
+    },
+    {
+      "device_time": "2026-02-01T18:00:00Z",
+      "event_id": "s-00250-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T21:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 5.324
+    },
+    {
+      "device_time": "2026-02-01T21:00:00Z",
+      "event_id": "s-00250-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-01T21:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00250",
+      "source": "sensor-central",
+      "value": 4.924
+    },
+    {
+      "device_time": "2026-02-07T12:00:00Z",
+      "event_id": "s-00300-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T12:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.817
+    },
+    {
+      "device_time": "2026-02-07T13:00:00Z",
+      "event_id": "s-00300-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T13:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.831
+    },
+    {
+      "device_time": "2026-02-07T14:00:00Z",
+      "event_id": "s-00300-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T14:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 4.671
+    },
+    {
+      "device_time": "2026-02-07T16:00:00Z",
+      "event_id": "s-00300-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T16:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.813
+    },
+    {
+      "device_time": "2026-02-07T16:00:00Z",
+      "event_id": "s-00300-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T16:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.813
+    },
+    {
+      "device_time": "2026-02-07T17:00:00Z",
+      "event_id": "s-00300-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T17:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.895
+    },
+    {
+      "device_time": "2026-02-07T15:00:00Z",
+      "event_id": "s-00300-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T18:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.586
+    },
+    {
+      "device_time": "2026-02-07T18:00:00Z",
+      "event_id": "s-00300-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T18:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 5.009
+    },
+    {
+      "device_time": "2026-02-07T19:00:00Z",
+      "event_id": "s-00300-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T19:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 4.33
+    },
+    {
+      "device_time": "2026-02-07T21:00:00Z",
+      "event_id": "s-00300-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T21:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.599
+    },
+    {
+      "device_time": "2026-02-07T22:00:00Z",
+      "event_id": "s-00300-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T22:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 5.858
+    },
+    {
+      "device_time": "2026-02-07T20:00:00Z",
+      "event_id": "s-00300-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T23:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 3.552
+    },
+    {
+      "device_time": "2026-02-07T23:00:00Z",
+      "event_id": "s-00300-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T23:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 6.919
+    },
+    {
+      "device_time": "2026-02-07T23:00:00Z",
+      "event_id": "s-00300-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-07T23:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 6.919
+    },
+    {
+      "device_time": "2026-02-08T00:00:00Z",
+      "event_id": "s-00300-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-08T00:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 7.766
+    },
+    {
+      "device_time": "2026-02-08T01:00:00Z",
+      "event_id": "s-00300-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-08T01:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 8.579
+    },
+    {
+      "device_time": "2026-02-08T02:00:00Z",
+      "event_id": "s-00300-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-08T02:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 9.286
+    },
+    {
+      "device_time": "2026-02-08T03:00:00Z",
+      "event_id": "s-00300-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-08T03:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "sensor-north",
+      "value": 10.118
+    },
+    {
+      "device_time": "2026-02-07T21:00:00Z",
+      "event_id": "s-00300-ticket",
+      "kind": "door_open",
+      "payload": {
+        "firmware": null
+      },
+      "received_at": "2026-02-08T05:24:00Z",
+      "revision": 1,
+      "shipment_id": "s-00300",
+      "source": "ops-console",
+      "value": 1.0
+    },
+    {
+      "device_time": "2026-02-13T18:00:00Z",
+      "event_id": "s-00350-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-13T18:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 2.932
+    },
+    {
+      "device_time": "2026-02-13T19:00:00Z",
+      "event_id": "s-00350-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-13T19:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 3.195
+    },
+    {
+      "device_time": "2026-02-13T20:00:00Z",
+      "event_id": "s-00350-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-13T20:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 3.374
+    },
+    {
+      "device_time": "2026-02-13T21:00:00Z",
+      "event_id": "s-00350-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-13T21:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 4.185
+    },
+    {
+      "device_time": "2026-02-13T22:00:00Z",
+      "event_id": "s-00350-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-13T22:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 4.714
+    },
+    {
+      "device_time": "2026-02-13T22:00:00Z",
+      "event_id": "s-00350-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-13T22:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 4.714
+    },
+    {
+      "device_time": "2026-02-13T23:00:00Z",
+      "event_id": "s-00350-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-13T23:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 3.796
+    },
+    {
+      "device_time": "2026-02-14T00:00:00Z",
+      "event_id": "s-00350-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T00:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 4.259
+    },
+    {
+      "device_time": "2026-02-14T01:00:00Z",
+      "event_id": "s-00350-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T01:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 4.326
+    },
+    {
+      "device_time": "2026-02-14T02:00:00Z",
+      "event_id": "s-00350-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T02:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 4.234
+    },
+    {
+      "device_time": "2026-02-14T05:00:00Z",
+      "event_id": "s-00350-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T05:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 6.015
+    },
+    {
+      "device_time": "2026-02-14T05:00:00Z",
+      "event_id": "s-00350-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T05:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 6.015
+    },
+    {
+      "device_time": "2026-02-14T03:00:00Z",
+      "event_id": "s-00350-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T06:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 4.158
+    },
+    {
+      "device_time": "2026-02-14T06:00:00Z",
+      "event_id": "s-00350-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T06:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 7.273
+    },
+    {
+      "device_time": "2026-02-14T04:00:00Z",
+      "event_id": "s-00350-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T07:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 5.544
+    },
+    {
+      "device_time": "2026-02-14T08:00:00Z",
+      "event_id": "s-00350-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T08:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 9.546
+    },
+    {
+      "device_time": "2026-02-14T09:00:00Z",
+      "event_id": "s-00350-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T09:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 10.851
+    },
+    {
+      "device_time": "2026-02-14T07:00:00Z",
+      "event_id": "s-00350-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-14T10:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 9.539
+    },
+    {
+      "device_time": "2026-02-14T02:00:00Z",
+      "event_id": "s-00350-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "correction": "calibrated",
+        "firmware": "4.8.1"
+      },
+      "received_at": "2026-02-14T10:35:00Z",
+      "revision": 2,
+      "shipment_id": "s-00350",
+      "source": "sensor-coast",
+      "value": 1.984
+    },
+    {
+      "device_time": "2026-02-14T03:00:00Z",
+      "event_id": "s-00350-ticket",
+      "kind": "door_open",
+      "payload": {
+        "firmware": null
+      },
+      "received_at": "2026-02-14T11:37:00Z",
+      "revision": 1,
+      "shipment_id": "s-00350",
+      "source": "ops-console",
+      "value": 1.0
+    },
+    {
+      "device_time": "2026-02-20T00:00:00Z",
+      "event_id": "s-00400-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T00:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 2.847
+    },
+    {
+      "device_time": "2026-02-20T01:00:00Z",
+      "event_id": "s-00400-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T01:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 3.702
+    },
+    {
+      "device_time": "2026-02-20T02:00:00Z",
+      "event_id": "s-00400-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T02:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.602
+    },
+    {
+      "device_time": "2026-02-20T04:00:00Z",
+      "event_id": "s-00400-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T04:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.469
+    },
+    {
+      "device_time": "2026-02-20T04:00:00Z",
+      "event_id": "s-00400-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T04:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.469
+    },
+    {
+      "device_time": "2026-02-20T05:00:00Z",
+      "event_id": "s-00400-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T05:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 3.979
+    },
+    {
+      "device_time": "2026-02-20T03:00:00Z",
+      "event_id": "s-00400-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T06:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.65
+    },
+    {
+      "device_time": "2026-02-20T06:00:00Z",
+      "event_id": "s-00400-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T06:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 5.317
+    },
+    {
+      "device_time": "2026-02-20T07:00:00Z",
+      "event_id": "s-00400-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T07:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 5.087
+    },
+    {
+      "device_time": "2026-02-20T08:00:00Z",
+      "event_id": "s-00400-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T08:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 3.895
+    },
+    {
+      "device_time": "2026-02-20T09:00:00Z",
+      "event_id": "s-00400-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T09:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.72
+    },
+    {
+      "device_time": "2026-02-20T10:00:00Z",
+      "event_id": "s-00400-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T10:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 5.258
+    },
+    {
+      "device_time": "2026-02-20T11:00:00Z",
+      "event_id": "s-00400-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T11:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.692
+    },
+    {
+      "device_time": "2026-02-20T11:00:00Z",
+      "event_id": "s-00400-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T11:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.692
+    },
+    {
+      "device_time": "2026-02-20T13:00:00Z",
+      "event_id": "s-00400-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T13:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 5.266
+    },
+    {
+      "device_time": "2026-02-20T14:00:00Z",
+      "event_id": "s-00400-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T14:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.749
+    },
+    {
+      "device_time": "2026-02-20T12:00:00Z",
+      "event_id": "s-00400-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T15:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 4.402
+    },
+    {
+      "device_time": "2026-02-20T15:00:00Z",
+      "event_id": "s-00400-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-20T15:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00400",
+      "source": "sensor-central",
+      "value": 5.262
+    },
+    {
+      "device_time": "2026-02-26T06:00:00Z",
+      "event_id": "s-00450-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T06:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 2.958
+    },
+    {
+      "device_time": "2026-02-26T07:00:00Z",
+      "event_id": "s-00450-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T07:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.936
+    },
+    {
+      "device_time": "2026-02-26T10:00:00Z",
+      "event_id": "s-00450-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T10:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 2.932
+    },
+    {
+      "device_time": "2026-02-26T10:00:00Z",
+      "event_id": "s-00450-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T10:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 2.932
+    },
+    {
+      "device_time": "2026-02-26T08:00:00Z",
+      "event_id": "s-00450-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T11:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.119
+    },
+    {
+      "device_time": "2026-02-26T11:00:00Z",
+      "event_id": "s-00450-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T11:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.776
+    },
+    {
+      "device_time": "2026-02-26T09:00:00Z",
+      "event_id": "s-00450-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T12:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.67
+    },
+    {
+      "device_time": "2026-02-26T12:00:00Z",
+      "event_id": "s-00450-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T12:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.481
+    },
+    {
+      "device_time": "2026-02-26T13:00:00Z",
+      "event_id": "s-00450-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T13:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.899
+    },
+    {
+      "device_time": "2026-02-26T14:00:00Z",
+      "event_id": "s-00450-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T14:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.188
+    },
+    {
+      "device_time": "2026-02-26T15:00:00Z",
+      "event_id": "s-00450-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T15:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.001
+    },
+    {
+      "device_time": "2026-02-26T17:00:00Z",
+      "event_id": "s-00450-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T17:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.735
+    },
+    {
+      "device_time": "2026-02-26T17:00:00Z",
+      "event_id": "s-00450-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T17:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.735
+    },
+    {
+      "device_time": "2026-02-26T16:00:00Z",
+      "event_id": "s-00450-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T19:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 5.032
+    },
+    {
+      "device_time": "2026-02-26T19:00:00Z",
+      "event_id": "s-00450-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T19:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 4.11
+    },
+    {
+      "device_time": "2026-02-26T20:00:00Z",
+      "event_id": "s-00450-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T20:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 5.035
+    },
+    {
+      "device_time": "2026-02-26T18:00:00Z",
+      "event_id": "s-00450-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T21:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 5.938
+    },
+    {
+      "device_time": "2026-02-26T21:00:00Z",
+      "event_id": "s-00450-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-02-26T21:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00450",
+      "source": "sensor-north",
+      "value": 3.515
+    },
+    {
+      "device_time": "2026-03-04T12:00:00Z",
+      "event_id": "s-00500-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T12:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 3.964
+    },
+    {
+      "device_time": "2026-03-04T13:00:00Z",
+      "event_id": "s-00500-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T13:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 2.983
+    },
+    {
+      "device_time": "2026-03-04T14:00:00Z",
+      "event_id": "s-00500-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T14:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.145
+    },
+    {
+      "device_time": "2026-03-04T15:00:00Z",
+      "event_id": "s-00500-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T15:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 3.687
+    },
+    {
+      "device_time": "2026-03-04T16:00:00Z",
+      "event_id": "s-00500-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T16:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 2.911
+    },
+    {
+      "device_time": "2026-03-04T16:00:00Z",
+      "event_id": "s-00500-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T16:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 2.911
+    },
+    {
+      "device_time": "2026-03-04T17:00:00Z",
+      "event_id": "s-00500-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T17:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.459
+    },
+    {
+      "device_time": "2026-03-04T18:00:00Z",
+      "event_id": "s-00500-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T18:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.48
+    },
+    {
+      "device_time": "2026-03-04T19:00:00Z",
+      "event_id": "s-00500-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T19:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.383
+    },
+    {
+      "device_time": "2026-03-04T21:00:00Z",
+      "event_id": "s-00500-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T21:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 3.946
+    },
+    {
+      "device_time": "2026-03-04T22:00:00Z",
+      "event_id": "s-00500-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T22:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.124
+    },
+    {
+      "device_time": "2026-03-04T20:00:00Z",
+      "event_id": "s-00500-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T23:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.291
+    },
+    {
+      "device_time": "2026-03-04T23:00:00Z",
+      "event_id": "s-00500-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T23:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.607
+    },
+    {
+      "device_time": "2026-03-04T23:00:00Z",
+      "event_id": "s-00500-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-04T23:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.607
+    },
+    {
+      "device_time": "2026-03-05T01:00:00Z",
+      "event_id": "s-00500-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-05T01:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.355
+    },
+    {
+      "device_time": "2026-03-05T03:00:00Z",
+      "event_id": "s-00500-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-05T03:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 5.128
+    },
+    {
+      "device_time": "2026-03-05T00:00:00Z",
+      "event_id": "s-00500-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-05T03:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.36
+    },
+    {
+      "device_time": "2026-03-05T02:00:00Z",
+      "event_id": "s-00500-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-05T05:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00500",
+      "source": "sensor-coast",
+      "value": 4.42
+    },
+    {
+      "device_time": "2026-03-10T18:00:00Z",
+      "event_id": "s-00550-temp-00",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-10T18:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.159
+    },
+    {
+      "device_time": "2026-03-10T19:00:00Z",
+      "event_id": "s-00550-temp-01",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-10T19:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.095
+    },
+    {
+      "device_time": "2026-03-10T20:00:00Z",
+      "event_id": "s-00550-temp-02",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-10T20:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 3.765
+    },
+    {
+      "device_time": "2026-03-10T21:00:00Z",
+      "event_id": "s-00550-temp-03",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-10T21:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.234
+    },
+    {
+      "device_time": "2026-03-10T22:00:00Z",
+      "event_id": "s-00550-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-10T22:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.536
+    },
+    {
+      "device_time": "2026-03-10T22:00:00Z",
+      "event_id": "s-00550-temp-04",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-10T22:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.536
+    },
+    {
+      "device_time": "2026-03-10T23:00:00Z",
+      "event_id": "s-00550-temp-05",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-10T23:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 3.911
+    },
+    {
+      "device_time": "2026-03-11T00:00:00Z",
+      "event_id": "s-00550-temp-06",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T00:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 3.523
+    },
+    {
+      "device_time": "2026-03-11T01:00:00Z",
+      "event_id": "s-00550-temp-07",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T01:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.022
+    },
+    {
+      "device_time": "2026-03-11T02:00:00Z",
+      "event_id": "s-00550-temp-08",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T02:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.405
+    },
+    {
+      "device_time": "2026-03-11T03:00:00Z",
+      "event_id": "s-00550-temp-09",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T03:01:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.54
+    },
+    {
+      "device_time": "2026-03-11T04:00:00Z",
+      "event_id": "s-00550-temp-10",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T04:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 5.129
+    },
+    {
+      "device_time": "2026-03-11T05:00:00Z",
+      "event_id": "s-00550-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T05:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.809
+    },
+    {
+      "device_time": "2026-03-11T05:00:00Z",
+      "event_id": "s-00550-temp-11",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T05:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.809
+    },
+    {
+      "device_time": "2026-03-11T06:00:00Z",
+      "event_id": "s-00550-temp-12",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T06:35:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.193
+    },
+    {
+      "device_time": "2026-03-11T07:00:00Z",
+      "event_id": "s-00550-temp-13",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T07:02:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 5.293
+    },
+    {
+      "device_time": "2026-03-11T09:00:00Z",
+      "event_id": "s-00550-temp-15",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T09:05:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.368
+    },
+    {
+      "device_time": "2026-03-11T08:00:00Z",
+      "event_id": "s-00550-temp-14",
+      "kind": "temperature_c",
+      "payload": {
+        "firmware": "4.7.9"
+      },
+      "received_at": "2026-03-11T11:00:00Z",
+      "revision": 1,
+      "shipment_id": "s-00550",
+      "source": "sensor-central",
+      "value": 4.781
+    }
+  ]
+}
