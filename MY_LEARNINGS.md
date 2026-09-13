@@ -336,6 +336,10 @@ Separate tab sessions prevent one walkthrough from moving another tab’s playba
 
 Verification: all 27 tests passed, including seven demo-specific tests. Browser checks confirmed the duplicate/correction example, snapshot restore, both reload controls, and evaluation metrics. The narrow layout was inspected at a 380-pixel viewport with no page-level horizontal overflow. The core engine, training logic and saved model were not changed for the UI.
 
+## Checkpoint 19: making the submission reviewable
+
+A reviewer needs a working startup command, an explanation of the evaluation split, comparison with a simple baseline, and evidence for each required behavior. The main README now puts those together. Average precision measures ranking; Brier score measures probability error. Slice counts matter: perfect recall on three incidents provides much less evidence than the same result on a large sample. Strong synthetic-data results do not settle reporting completeness or production performance. We should explain the immature-row contract difference directly rather than imply every original requirement is met exactly.
+
 ## Checkpoint 18: what is still worth improving
 
 The system passes 27 tests, but passing tests and meeting every interpretation of the assignment are different questions. The builder currently leaves immature checkpoints out because their outcomes are unknown. The README asks for a binary-labeled row at each checkpoint. This needs an explicit contract discussion rather than silently treating unknown as negative.

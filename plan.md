@@ -108,6 +108,10 @@ Start the local demo and follow the late-correction example. Delivery playback, 
 
 Built the optional demo with separate playback sessions per tab. Every displayed feature set is checked against the engine’s feature digest. Automated tests cover duplicates, late corrections, eviction, restore, reload, source-data playback and tab isolation. Browser checks cover the controls and saved evaluation view. The engine code and model artifact are unchanged.
 
+## Checkpoint 19: repository handoff documentation
+
+Added main README navigation, environment setup, server startup, retraining and replay commands, saved evaluation metrics, operational slices, and a requirement-to-evidence map. Keep the original assignment available below the submission guide. The handoff must make the immature-row contract difference and synthetic-data limits visible alongside the results. Updated the GitHub About description with the project scope. Next: rehearse the runbook against a new stream and explain the documented tradeoffs.
+
 ## Checkpoint 18: improvement review and presentation
 
 Reviewed the implementation against the README and recorded priorities in IMPROVEMENTS.md. The main submission concern is the documented omission of immature training rows from a contract that requests every checkpoint. Further priorities are explicit observation coverage, measured memory/latency, bounded snapshot parsing, minimum-version testing and validation on real data. No model or engine policy was changed during this review.
