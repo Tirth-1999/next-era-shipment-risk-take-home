@@ -7,6 +7,14 @@ from .features import event_from_mapping, utc
 
 
 def jsonl(path):
+    """Yield nonblank JSON objects from a JSON Lines file.
+
+    Args:
+        path: File path to read.
+
+    Yields:
+        One decoded JSON object per nonblank line.
+    """
     with Path(path).open() as handle:
         for line in handle:
             if line.strip():
@@ -14,6 +22,13 @@ def jsonl(path):
 
 
 def main():
+    """Run the package command-line interface.
+
+    The ``train`` command builds point-in-time training rows from the data
+    folder and writes a model artifact. The ``replay`` command feeds events to
+    the online engine in delivery order, writes canonical predictions, and
+    saves a restorable snapshot.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=['train', 'replay'])
     parser.add_argument('--data', type=Path, default=Path('data'))

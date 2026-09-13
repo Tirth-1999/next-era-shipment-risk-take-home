@@ -22,12 +22,27 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def read_jsonl(path):
+    """Read a small JSON Lines file into memory for the local demo.
+
+    Args:
+        path: JSONL file path.
+
+    Returns:
+        List of decoded JSON objects, skipping blank lines.
+    """
     with path.open() as handle:
         return [json.loads(line) for line in handle if line.strip()]
 
 
 def lesson():
+    """Build the hand-crafted teaching stream used by the UI.
+
+    Returns:
+        List of JSON-compatible event dictionaries that demonstrate duplicate
+        delivery, late correction, separate shipments, and a device-clock error.
+    """
     def reading(eid, sid, device, received, value, revision=1):
+        """Create one temperature reading for the teaching stream."""
         return dict(event_id=eid, revision=revision, shipment_id=sid,
                     device_time=f'2026-01-01T{device}:00+00:00',
                     received_at=f'2026-01-01T{received}:00+00:00',
@@ -44,6 +59,12 @@ def lesson():
 class Demo:
     """A single local walkthrough, protected from overlapping browser requests."""
     def __init__(self, artifact=ROOT/'outputs/final_model', data=ROOT/'data'):
+        """Create a demo session and load the first teaching event.
+
+        Args:
+            artifact: Model artifact directory used by ``RiskEngine``.
+            data: Data directory used by the sample-dataset scenario.
+        """
         self.artifact = Path(artifact)
         self.data = Path(data)
         self.temporary = TemporaryDirectory(prefix='dispatch-demo-')
@@ -55,6 +76,16 @@ class Demo:
         self.reset('lesson', 2)
 
     def reset(self, scenario, capacity):
+        """Reset the walkthrough to a scenario and shipment capacity.
+
+        Args:
+            scenario: ``lesson`` for the hand-crafted stream or ``sample`` for
+                the supplied dataset.
+            capacity: Maximum number of shipments retained by the engine.
+
+        Raises:
+            ValueError: If the scenario, capacity, or source data is invalid.
+        """
         if scenario not in ('lesson', 'sample'):
             raise ValueError('Choose the lesson or the supplied dataset.')
         if type(capacity) is not int or not 1 <= capacity <= 10000:
@@ -75,6 +106,14 @@ class Demo:
         self.advance(1)
 
     def advance(self, count):
+        """Ingest the next deliveries in file order.
+
+        Args:
+            count: Number of deliveries to process, capped by remaining events.
+
+        Raises:
+            ValueError: If the requested step size is outside the demo limit.
+        """
         if type(count) is not int or not 1 <= count <= 1000:
             raise ValueError('Advance between 1 and 1,000 deliveries at a time.')
         for _ in range(min(count, len(self.events)-self.position)):
@@ -82,6 +121,20 @@ class Demo:
             self.position += 1
 
     def act(self, request):
+        """Apply one browser action and return the updated view model.
+
+        Args:
+            request: Action object from ``/api/action``. Supported actions are
+                ``view``, ``step``, ``save``, ``restore``, ``reload_valid``,
+                ``reload_invalid``, and ``reset``.
+
+        Returns:
+            Dictionary returned by ``view``.
+
+        Raises:
+            ValueError: If the action or selected shipment/time is invalid.
+            RuntimeError: If a restore or reload invariant fails.
+        """
         with self.lock:
             action = request.get('action', 'view')
             if action == 'reset':
@@ -130,6 +183,17 @@ class Demo:
             return self.view()
 
     def view(self):
+        """Build the JSON state shown by the browser UI.
+
+        Returns:
+            Dictionary containing the selected shipment, decision time,
+            prediction, feature values, retained deliveries, engine stats, and
+            explanatory status text.
+
+        Raises:
+            RuntimeError: If displayed features do not match the prediction
+                digest produced by the engine.
+        """
         # Inspect a public snapshot rather than reaching into private engine fields.
         self.engine.snapshot(self.work/'inspect.json')
         state = json.loads((self.work/'inspect.json').read_text())['state']
@@ -177,6 +241,13 @@ class Demo:
                     has_snapshot=self.saved is not None, message=self.message)
 
     def outcomes(self):
+        """Return retrospective reports for the currently selected shipment.
+
+        Returns:
+            Dictionary with explanatory note text and the available incident
+            reports. These reports are shown for teaching only and are not used
+            to score the current prediction.
+        """
         with self.lock:
             if self.scenario == 'lesson':
                 return dict(note='Invented incident for the teaching example; not used by the model.', reports=[
@@ -190,11 +261,28 @@ class Demo:
 class Sessions:
     """Keep tab playbacks separate and bound the number of local demo sessions."""
     def __init__(self, default):
+        """Create a manager around the default demo session.
+
+        Args:
+            default: Shared session used when the browser sends no session ID.
+        """
         self.default = default
         self.sessions = OrderedDict()
         self.lock = RLock()
 
     def get(self, token):
+        """Return the demo session associated with a browser token.
+
+        Args:
+            token: Optional UUID-like browser session token.
+
+        Returns:
+            Existing or newly created ``Demo`` instance. At most eight custom
+            sessions are retained.
+
+        Raises:
+            ValueError: If the token format is invalid.
+        """
         if not token:
             return self.default
         if not re.fullmatch(r'[a-f0-9-]{36}', token):
@@ -211,9 +299,21 @@ class Sessions:
 
 
 def make_handler(demo):
+    """Create the HTTP request handler bound to a demo manager.
+
+    Args:
+        demo: Default ``Demo`` instance.
+
+    Returns:
+        ``BaseHTTPRequestHandler`` subclass serving static files and JSON API
+        routes for the local walkthrough.
+    """
     sessions = Sessions(demo)
     class Handler(BaseHTTPRequestHandler):
+        """HTTP adapter for the browser-based shipment-risk walkthrough."""
+
         def send(self, code, body, content_type='application/json'):
+            """Send a JSON or static-file response with defensive headers."""
             data = canonical(body) if content_type == 'application/json' else body
             self.send_response(code)
             self.send_header('Content-Type', content_type)
@@ -225,6 +325,7 @@ def make_handler(demo):
             self.wfile.write(data)
 
         def do_GET(self):
+            """Serve static assets and read-only demo API routes."""
             route = urlsplit(self.path).path
             try:
                 if route == '/api/state':
@@ -243,6 +344,7 @@ def make_handler(demo):
                 self.send(400, {'error':str(exc)})
 
         def do_POST(self):
+            """Apply one local demo action after basic origin and size checks."""
             # The demo controls a local process; reject cross-origin browser writes.
             origin = self.headers.get('Origin')
             if origin and urlsplit(origin).netloc != self.headers.get('Host'):
@@ -259,11 +361,13 @@ def make_handler(demo):
                 self.send(400,{'error':str(exc)})
 
         def log_message(self, *_):
+            """Silence default HTTP request logging for a cleaner demo terminal."""
             pass
     return Handler
 
 
 def main():
+    """Start the local threaded HTTP server for the walkthrough UI."""
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--artifact', type=Path, default=ROOT/'outputs/final_model')

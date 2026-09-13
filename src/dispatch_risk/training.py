@@ -15,6 +15,25 @@ GRACE=timedelta(hours=48)
 
 
 def build_training_rows(events, labels, decision_times):
+    """Create mature point-in-time examples from events, labels, and checkpoints.
+
+    Args:
+        events: Iterable of ``TelemetryEvent`` objects in delivery order.
+            Duplicate deliveries are allowed only when their content matches.
+        labels: Iterable of incident-report mappings with ``incident_at`` and
+            ``label_available_at`` timestamps.
+        decision_times: Iterable of ``(shipment_id, decision_time)`` pairs at
+            which the model would have been asked to predict.
+
+    Returns:
+        List of ``TrainingRow`` objects. Rows whose six-hour outcome window plus
+        48-hour reporting grace has not completed by the observation cutoff are
+        excluded rather than silently labeled negative.
+
+    Raises:
+        ValueError: If event or incident identities conflict, timestamps are
+            invalid, or identifiers fail validation.
+    """
     decisions=sorted({(identifier(s,"shipment_id"),aware(t)) for s,t in decision_times},key=lambda x:(x[1],x[0]))
     if not decisions:
         return []
@@ -73,6 +92,17 @@ def build_training_rows(events, labels, decision_times):
 
 
 def _label(row,cutoff):
+    """Resolve a row label as of a training or evaluation cutoff.
+
+    Args:
+        row: Candidate training row.
+        cutoff: Time by which outcome reports are assumed observable.
+
+    Returns:
+        ``1`` for an incident inside the horizon, ``0`` for an eligible
+        no-incident row, or ``None`` when the row is still immature at the
+        supplied cutoff.
+    """
     if row.decision_time+HORIZON+GRACE>cutoff:
         return None
     incidents=row.metadata.get("outcome_incidents")
@@ -86,6 +116,25 @@ def _label(row,cutoff):
 
 
 def train(rows, artifact_dir):
+    """Train the portable model artifact and write evaluation output.
+
+    Args:
+        rows: Mature ``TrainingRow`` examples. Rows are split by chronological
+            shipment cohort into train, validation, development, and test
+            groups.
+        artifact_dir: Directory where ``model.json`` and ``evaluation.json``
+            will be written.
+
+    Returns:
+        Evaluation report dictionary containing split boundaries, validation
+        metrics, held-out metrics, slice metrics, limitations, model kind, and
+        model version.
+
+    Raises:
+        ValueError: If no usable rows are supplied, duplicate checkpoints are
+            present, labels/features are invalid, dataset cutoffs are mixed, or
+            the portable scorer disagrees with the fitted sklearn pipeline.
+    """
     import numpy as np
     import pandas as pd
     import sklearn
@@ -115,6 +164,7 @@ def train(rows, artifact_dir):
         first.setdefault(row.shipment_id,utc(row.metadata["cohort_first_decision"]) if "cohort_first_decision" in row.metadata else row.decision_time)
     ordered=sorted(first,key=lambda s:(first[s],s))
     def consistent(field,default):
+        """Read one shared timestamp metadata field across all rows."""
         values={r.metadata[field] for r in rows if field in r.metadata}
         if len(values)>1:
             raise ValueError("Mixed dataset cutoffs")
@@ -123,6 +173,7 @@ def train(rows, artifact_dir):
     test=consistent("test_start",first[ordered[min(int(len(ordered)*.8),len(ordered)-1)]])
     observation=consistent("observation_cutoff",max(r.decision_time for r in rows)+HORIZON+GRACE)
     def subset(group,cutoff):
+        """Select rows and labels for a named chronological cohort."""
         selected=[]; ys=[]
         for r in rows:
             belongs=(first[r.shipment_id]<val if group=="train" else val<=first[r.shipment_id]<test if group=="validation" else first[r.shipment_id]<test if group=="development" else first[r.shipment_id]>=test)
@@ -132,8 +183,10 @@ def train(rows, artifact_dir):
         return selected,np.array(ys,dtype=int)
     tr,yt=subset("train",val);va,yv=subset("validation",test);dev,yd=subset("development",test);te,ye=subset("test",observation)
     def X(rs):
+        """Convert training rows into a pandas feature matrix."""
         return pd.DataFrame([{name:r.features.get(name) for name in FEATURES} for r in rs],columns=FEATURES,dtype=float)
     def fit(rs,ys):
+        """Fit the sklearn logistic pipeline or return ``None`` for one class."""
         if len(np.unique(ys))<2:
             return None
         prep=ColumnTransformer([("values",Pipeline([("impute",SimpleImputer(strategy="median",keep_empty_features=True)),("scale",StandardScaler())]),FEATURES),("missing",MissingIndicator(features="all"),FEATURES)],sparse_threshold=0)
@@ -142,6 +195,7 @@ def train(rows, artifact_dir):
             model.fit(X(rs),ys)
         return model
     def measure(ys,p):
+        """Calculate probability and threshold metrics for one evaluation set."""
         if not len(ys):
             return {"rows":0,"positives":0,"average_precision":None,"brier":None,"log_loss":None,"recall_at_0_2":None,"precision_at_0_2":None}
         tn,fp,fn,tp=confusion_matrix(ys,p>=.2,labels=[0,1]).ravel()

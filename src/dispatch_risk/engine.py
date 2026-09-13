@@ -16,7 +16,27 @@ MAX_RECORDS_PER_SHIPMENT = 128
 
 
 class RiskEngine:
+    """Thread-safe online scorer for retained shipment telemetry.
+
+    The engine stores a bounded set of normalized events, reconstructs the
+    point-in-time shipment state for each score call, and delegates probability
+    calculation to a portable model artifact. It is designed so duplicate
+    deliveries, late corrections, snapshot/restore, and failed model reloads
+    have predictable behavior that can be tested and explained.
+    """
+
     def __init__(self, artifact_dir: Path, max_shipments: int = 10_000):
+        """Create an engine with a loaded model and empty retained state.
+
+        Args:
+            artifact_dir: Directory containing ``model.json``.
+            max_shipments: Maximum number of shipment histories retained in
+                memory before least-recently-used eviction starts.
+
+        Raises:
+            ValueError: If ``max_shipments`` is not a positive integer or the
+                model artifact is invalid.
+        """
         if type(max_shipments) is not int or max_shipments <= 0:
             raise ValueError("max_shipments must be a positive integer")
         self._model = load_model(artifact_dir)
@@ -27,6 +47,20 @@ class RiskEngine:
         self._accepted = self._evictions = self._trimmed = 0
 
     def ingest(self, event: TelemetryEvent) -> bool:
+        """Ingest one event delivery into bounded shipment history.
+
+        Args:
+            event: Raw telemetry event received from the delivery stream.
+
+        Returns:
+            ``True`` when the event created new retained state. ``False`` when
+            the delivery was an exact duplicate or older than already discarded
+            history.
+
+        Raises:
+            ValueError: If a duplicate delivery conflicts, an event ID changes
+                shipment, or the event fails normalization.
+        """
         record = normalize_event(event)
         sid, eid = record['shipment_id'], record['event_id']
         key = (eid, record['revision'])
@@ -75,6 +109,20 @@ class RiskEngine:
             return True
 
     def score(self, shipment_id: str, as_of: datetime) -> Prediction:
+        """Score incident risk for one shipment at one decision time.
+
+        Args:
+            shipment_id: Shipment to score.
+            as_of: Decision time. The feature extractor only uses revisions
+                whose ``received_at`` timestamp is at or before this instant.
+
+        Returns:
+            ``Prediction`` containing probability, feature digest, model
+            version, and any degraded-context reasons.
+
+        Raises:
+            ValueError: If the shipment ID or decision time is invalid.
+        """
         sid = identifier(shipment_id, 'shipment_id')
         checkpoint = aware(as_of)
         with self._lock:
@@ -101,6 +149,15 @@ class RiskEngine:
                               digest, bool(reasons), tuple(sorted(reasons)))
 
     def snapshot(self, destination: Path) -> None:
+        """Write a checksum-protected snapshot of retained engine state.
+
+        Args:
+            destination: File path that will receive canonical JSON bytes.
+
+        Returns:
+            ``None``. The file is written atomically after the in-memory state
+            is encoded under lock.
+        """
         with self._lock:
             body = {'schema_version': 1, 'feature_version': FEATURE_VERSION,
                     'model_version': self._model.version,
@@ -120,6 +177,21 @@ class RiskEngine:
 
     @classmethod
     def restore(cls, artifact_dir: Path, snapshot: Path) -> 'RiskEngine':
+        """Restore an engine from a previously written snapshot.
+
+        Args:
+            artifact_dir: Directory containing the same model version used by
+                the snapshot.
+            snapshot: Snapshot file created by ``snapshot``.
+
+        Returns:
+            A new ``RiskEngine`` with retained shipments, counters, and event
+            ownership rebuilt from the snapshot.
+
+        Raises:
+            ValueError: If the checksum, schema, model version, retention caps,
+                counters, or event identities are invalid.
+        """
         wrapper = json.loads(Path(snapshot).read_bytes())
         body = wrapper['state']
         if hashlib.sha256(canonical(body)).hexdigest() != wrapper['sha256']:
@@ -157,6 +229,16 @@ class RiskEngine:
         return result
 
     def reload_model(self, artifact_dir: Path) -> bool:
+        """Atomically swap to another valid model artifact.
+
+        Args:
+            artifact_dir: Directory containing the candidate ``model.json``.
+
+        Returns:
+            ``True`` when the new artifact loads and replaces the current
+            model. ``False`` when loading or validation fails; in that case the
+            previous model remains active.
+        """
         try:
             candidate = load_model(artifact_dir)
         except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError):
@@ -166,6 +248,13 @@ class RiskEngine:
         return True
 
     def stats(self):
+        """Return operational counters and retention limits.
+
+        Returns:
+            Dictionary with retained shipment count, record count, capacity
+            settings, event-byte budget, accepted deliveries, evictions,
+            trimmed records, and active model version.
+        """
         with self._lock:
             records = sum(len(s['records']) for s in self._ships.values())
             return {'shipments': len(self._ships), 'max_shipments': self._max_shipments,
