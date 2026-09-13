@@ -478,12 +478,25 @@ def make_handler(demo):
                 elif route == "/api/outcomes":
                     current = sessions.get(self.headers.get("X-Demo-Session"))
                     self.send(200, current.outcomes())
-                elif route in ("/", "/app.js", "/style.css"):
-                    name = "index.html" if route == "/" else route[1:]
+                elif route in (
+                    "/", "/app.js", "/style.css", "/presentation",
+                    "/presentation/", "/presentation.css", "/presentation.js",
+                    "/presentation-slides.css",
+                ):
+                    # Explicit routes keep arbitrary workspace files inaccessible.
+                    name = {
+                        "/": "index.html",
+                        "/presentation": "presentation.html",
+                        "/presentation/": "presentation.html",
+                    }.get(route, route[1:])
                     kind = {
                         "index.html": "text/html; charset=utf-8",
                         "app.js": "text/javascript; charset=utf-8",
                         "style.css": "text/css; charset=utf-8",
+                        "presentation.html": "text/html; charset=utf-8",
+                        "presentation.js": "text/javascript; charset=utf-8",
+                        "presentation.css": "text/css; charset=utf-8",
+                        "presentation-slides.css": "text/css; charset=utf-8",
                     }[name]
                     self.send(200, (Path(__file__).parent / name).read_bytes(), kind)
                 else:

@@ -25,6 +25,8 @@ $env:PYTHONPATH = "src"
 
 Then open [**Open local walkthrough →**](http://127.0.0.1:8765). Stop with **Ctrl+C**. The saved model and sample data are reused; no retraining is needed each time. If the port is occupied, use `--port 8766` and open the matching address.
 
+For slides, open [**Presentation →**](http://127.0.0.1:8765/presentation) on the same server, or use **Presentation** in the demo sidebar. Arrow keys change slides; **F** toggles fullscreen and **N** toggles speaker notes. The slide picker jumps to any of the nine slides. Notes appear on the same page, so hide them when sharing your screen. The **Live demo** link returns to the engine walkthrough.
+
 The navigation links jump to instructions. GitHub does not start your local Python server when you click them; run the command first.
 
 </details>

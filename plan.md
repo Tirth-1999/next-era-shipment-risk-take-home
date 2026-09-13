@@ -110,6 +110,10 @@ Built the optional demo with separate playback sessions per tab. Every displayed
 
 ## Checkpoint 19: repository handoff documentation
 
+### Browser presentation
+
+The existing nine-slide PowerPoint is also available as HTML at `/presentation` on the demo server. A standard-library exporter preserves the deck's text, tables and notes; the viewer adds keyboard navigation, fullscreen, slide links and a return to the live demo. Re-export after changing the PowerPoint. The presentation remains optional interview preparation and does not change model or engine behavior.
+
 Added main README navigation, environment setup, server startup, retraining and replay commands, saved evaluation metrics, operational slices, and a requirement-to-evidence map. Keep the original assignment available below the submission guide. The handoff must make the immature-row contract difference and synthetic-data limits visible alongside the results. Updated the GitHub About description with the project scope. Next: rehearse the runbook against a new stream and explain the documented tradeoffs.
 
 ## Checkpoint 18: improvement review and presentation

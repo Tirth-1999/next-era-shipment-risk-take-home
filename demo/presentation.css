@@ -1,0 +1,26 @@
+:root { color-scheme: light; font-family: Arial, sans-serif; color: #203b33; background: #e8e9e2; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+[hidden] { display: none !important; }
+header, nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 24px; }
+header { background: #203b33; color: #f5f4ef; font-size: 12px; letter-spacing: 1.4px; }
+header a { color: #daeb9c; text-decoration: none; letter-spacing: 0; font-size: 15px; }
+button, select { font: inherit; border: 1px solid #a8b4a6; border-radius: 5px; padding: 9px 14px; background: #f5f4ef; color: #203b33; cursor: pointer; }
+button:hover { background: #daeb9c; }
+button:disabled { opacity: .4; cursor: default; }
+:focus-visible { outline: 3px solid #769331; outline-offset: 3px; }
+#stage { width: min(100%, calc((100vh - 156px) * 16 / 9)); margin: 16px auto 0; container-type: inline-size; }
+.slide { position: relative; width: 100%; overflow: hidden; box-shadow: 0 8px 28px #203b3317; }
+.text-box { padding: .375cqw .75cqw; }
+.slide p { margin: 0; line-height: 1.15; white-space: pre-wrap; }
+.slide table { border-collapse: collapse; table-layout: fixed; }
+.slide th, .slide td { padding: .375cqw .75cqw; border: 1px solid #dfe4d7; vertical-align: middle; text-align: left; }
+nav { justify-content: center; flex-wrap: wrap; padding-bottom: 0; }
+nav label { display: flex; align-items: center; gap: 8px; }
+#status { text-align: center; font-size: 12px; color: #657372; margin: 10px; }
+#notes { max-width: 1000px; margin: 20px auto; padding: 24px; background: #f5f4ef; border-top: 3px solid #203b33; line-height: 1.6; }
+#notes h2 { font: 28px Georgia, serif; margin-top: 0; }
+#notes p { white-space: pre-wrap; }
+body:fullscreen { overflow: auto; }
+@media (max-width: 600px) { header { padding: 10px; } header span { display: none; } #stage { width: 100%; } nav { gap: 8px; padding: 12px 8px 0; } button, select { padding: 8px; } }
+@media print { @page { size: landscape; margin: 0; } header, nav, #status, #notes { display: none !important; } #stage { width: 100%; margin: 0; } .slide, .slide[hidden] { display: block !important; box-shadow: none; break-after: page; } }

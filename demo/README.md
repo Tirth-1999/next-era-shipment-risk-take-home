@@ -1,5 +1,15 @@
 # Local shipment walkthrough
 
+## Browser presentation
+
+The same server serves the nine-slide interview deck at `http://127.0.0.1:8765/presentation` (a trailing slash also works). Use the sidebar's **Presentation** link or enter the URL in Chrome. No additional server or dependency is required.
+
+Use arrow keys or Previous/Next to navigate, the slide picker to jump, **F** for fullscreen, and **N** for speaker notes. Notes appear below the slide on the same page; hide them before sharing the screen. A slide URL such as `/presentation#slide-6` can be bookmarked. **Live demo** returns to `/`.
+
+Text, tables, colors and speaker notes are exported from `outputs/presentation/Shipment_Risk_Interview.pptx`. After updating that deck, run `python tools/export_presentation.py` to regenerate `demo/presentation.html` and `demo/presentation-slides.css`. The exporter supports the text boxes and tables in this deck and rejects unsupported shapes; it is not a general PowerPoint converter. Fonts are supplied by the browser, so line wrapping can differ slightly from PowerPoint.
+
+## Start the server
+
 Run from the repository root after installing the project and generating the model:
 
 ```bash
