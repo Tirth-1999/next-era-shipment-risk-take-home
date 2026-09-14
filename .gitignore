@@ -1,3 +1,7 @@
-
-# Local interview runs retain evidence without publishing generated replays.
-outputs/interview/
+personal/outputs/interview/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.egg-info/
+personal/.presentation-build/

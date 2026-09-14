@@ -1,103 +1,32 @@
 # Shipment Risk Engine
 
-Predict the risk of a refrigerated shipment having a temperature incident in the next six hours, using only the information available at prediction time. The implementation handles duplicate deliveries, late corrections, bounded history, deterministic replay, snapshots, and model reload during scoring.
+A local Python engine for six-hour refrigerated-shipment incident risk. It reconstructs what was known at each decision time, trains a model, and serves deterministic predictions with bounded history.
 
-| [**Run Server**](#run-the-server) | [Evaluation](#evaluation-results) | [Requirements](#requirement-coverage) | [Decisions](DECISIONS.md) | [Runbook](RUNBOOK.md) | [Assignment](#take-home-point-in-time-risk-engine) |
-| --- | --- | --- | --- | --- | --- |
+## Run the submission
 
-## Run the server
-
-<details open>
-<summary><strong>Quick start — environment already installed</strong></summary>
-
-From the repository root on macOS/Linux, copy this command into your terminal:
+Use Python 3.11 or newer, from the repository root:
 
 ```bash
-PYTHONPATH=src .venv/bin/python -m demo.server --port 8765
-```
-
-On Windows PowerShell:
-
-```powershell
-$env:PYTHONPATH = "src"
-.\.venv\Scripts\python.exe -m demo.server --port 8765
-```
-
-Then open [**Open local walkthrough →**](http://127.0.0.1:8765). Stop with **Ctrl+C**. The saved model and sample data are reused; no retraining is needed each time. If the port is occupied, use `--port 8766` and open the matching address.
-
-For slides, open [**Presentation →**](http://127.0.0.1:8765/presentation) on the same server, or use **Presentation** in the demo sidebar. Arrow keys change slides; **F** toggles fullscreen and **N** toggles speaker notes. The slide picker jumps to any of the nine slides. Notes appear on the same page, so hide them when sharing your screen. The **Live demo** link returns to the engine walkthrough.
-
-The navigation links jump to instructions. GitHub does not start your local Python server when you click them; run the command first.
-
-</details>
-
-<details>
-<summary><strong>First-time setup</strong></summary>
-
-Run these commands from the repository root with Python 3.11 or newer. Python 3.14 was used for local verification; the minimum version has not been separately tested.
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
 python -m pip install -e '.[dev]'
-```
-
-On Windows, create the environment with `py -m venv .venv` and activate it in PowerShell with `.venv\Scripts\Activate.ps1`.
-
-Once installed, use the quick-start command above.
-
-</details>
-
-<details>
-<summary><strong>Regenerate data or retrain the model</strong></summary>
-
-Use an activated environment for the following commands.
-
-The repository includes sample data and a saved model. To regenerate the sample data and retrain the fixed model family, run:
-
-```bash
-python tools/generate_dataset.py
-python -m dispatch_risk train --data data --artifact outputs/final_model
-```
-
-These commands replace the generated data and model at those paths. Training also writes `outputs/final_model/evaluation.json`; it does not repeat model selection using test results.
-
-</details>
-
-<details>
-<summary><strong>Server options and walkthrough views</strong></summary>
-
-Start the local walkthrough:
-
-```bash
-python -m demo.server --port 8765 --data data --artifact outputs/final_model
-```
-
-Open **http://127.0.0.1:8765**. Stop the server with **Ctrl+C**. Use a different `--port` if 8765 is occupied. If an editable installation cannot find `dispatch_risk` on macOS/Linux, use `PYTHONPATH=src .venv/bin/python -m demo.server`.
-
-The page has three views:
-
-- **Replay a shipment:** inspect deliveries, eligible measurements, predictions, retention counters, snapshot/restore, and model reload.
-- **Review the model:** inspect the saved evaluation, constant baseline, and operational slices.
-- **Walkthrough notes:** follow the explanation of each engineering decision.
-
-The UI is an optional local interview aid. The original assignment excludes UI work from assessment; training and serving work through the Python package without the demo. See [demo instructions](demo/README.md) for session behavior and limitations.
-
-</details>
-
-<details>
-<summary><strong>Tests and command-line replay</strong></summary>
-
-To test and run the engine without the UI:
-
-```bash
 python -m pytest
-python -m dispatch_risk replay --data data --artifact outputs/final_model --max-shipments 32 --output outputs/replay
+python -m dispatch_risk train --artifact outputs/final_model
+python -m dispatch_risk replay --artifact outputs/final_model --max-shipments 32 --output outputs/replay
 ```
 
-Replay writes `predictions.jsonl` and `snapshot.json` to the output directory. See [RUNBOOK.md](RUNBOOK.md) for a new-stream example, replay comparison, restore, reload, and follow-up debugging instructions. Dependencies must be installed beforehand; training and scoring then run offline.
+The sample data and portable model are included. To regenerate sample data, run `python tools/generate_dataset.py`. Training and scoring run offline after dependencies are installed. See [RUNBOOK.md](personal/RUNBOOK.md) for fresh-stream and recovery commands, and [DECISIONS.md](DECISIONS.md) for policies and limitations.
 
-</details>
+## Repository layout
+
+| Location | Purpose |
+| --- | --- |
+| `src/dispatch_risk/` | Public implementation |
+| `tests/` | Submission tests |
+| `tools/generate_dataset.py` | Supplied deterministic generator |
+| `data/` | Source sample records |
+| `outputs/final_model/` | Portable model, evaluation and verification evidence |
+| `personal/` | Optional notebooks, learning notes, UI and interview preparation |
+
+The assessed package and core tests do not depend on `personal/`. That folder can be omitted from a submission copy. [Personal preparation index](personal/README.md).
 
 ## Evaluation results
 
@@ -109,52 +38,60 @@ For the saved run, validation starts on February 15, 2026 at 08:00 UTC; test sta
 
 Constant, logistic regression, shallow tree, random forest, and gradient boosting were compared on validation data. The selection rule required better average precision and Brier score than the constant baseline, then selected the simplest model within 0.002 Brier of the best eligible model. Logistic regression was selected before test evaluation and refitted on mature development data available at test start.
 
-| Held-out metric | Logistic regression | Constant baseline |
-| --- | ---: | ---: |
-| Average precision (higher is better) | 0.981277 | 0.080906 |
-| Brier score (lower is better) | 0.003760 | 0.074380 |
-| Log loss (lower is better) | 0.020847 | 0.281113 |
-| Recall at illustrative 20% threshold | 96% | 0% |
-| True positives / false negatives / false positives | 24 / 1 / 0 | 0 / 25 / 0 |
+
+| Held-out metric                                    | Logistic regression | Constant baseline |
+| -------------------------------------------------- | ------------------- | ----------------- |
+| Average precision (higher is better)               | 0.981277            | 0.080906          |
+| Brier score (lower is better)                      | 0.003760            | 0.074380          |
+| Log loss (lower is better)                         | 0.020847            | 0.281113          |
+| Recall at illustrative 20% threshold               | 96%                 | 0%                |
+| True positives / false negatives / false positives | 24 / 1 / 0          | 0 / 25 / 0        |
+
 
 The constant baseline gives every example the incident prevalence learned from mature development rows. Average precision measures how well incidents rank above non-incidents. Brier score measures squared probability error; it assesses probability quality but does not by itself prove calibration.
 
 Operational slices check whether performance changes across sensor sources, stale measurements, or missing trend evidence:
 
-| Slice | Rows | Positives | Average precision | Brier score | Recall at 20% |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Sensor central | 103 | 3 | 1.000000 | 0.000301 | 100% |
-| Sensor coast | 102 | 14 | 0.981203 | 0.009918 | 92.9% |
-| Sensor north | 104 | 8 | 1.000000 | 0.001147 | 100% |
-| Measurement older than 30 minutes | 256 | 22 | 0.978936 | 0.004330 | 95.5% |
-| Measurement within 30 minutes | 53 | 3 | 1.000000 | 0.001010 | 100% |
-| Temperature trend missing | 77 | 9 | 1.000000 | 0.002004 | 100% |
-| Temperature trend present | 232 | 16 | 0.980978 | 0.004343 | 93.8% |
 
-Slices within each dimension partition the test rows; dimensions overlap. Small positive counts make slice estimates uncertain. [Notebook 13](notebooks/13_final_evaluation_and_model_artifact.ipynb) also contains reliability bins and shipment-bootstrap uncertainty.
+| Slice                             | Rows | Positives | Average precision | Brier score | Recall at 20% |
+| --------------------------------- | ---- | --------- | ----------------- | ----------- | ------------- |
+| Sensor central                    | 103  | 3         | 1.000000          | 0.000301    | 100%          |
+| Sensor coast                      | 102  | 14        | 0.981203          | 0.009918    | 92.9%         |
+| Sensor north                      | 104  | 8         | 1.000000          | 0.001147    | 100%          |
+| Measurement older than 30 minutes | 256  | 22        | 0.978936          | 0.004330    | 95.5%         |
+| Measurement within 30 minutes     | 53   | 3         | 1.000000          | 0.001010    | 100%          |
+| Temperature trend missing         | 77   | 9         | 1.000000          | 0.002004    | 100%          |
+| Temperature trend present         | 232  | 16        | 0.980978          | 0.004343    | 93.8%         |
+
+
+Slices within each dimension partition the test rows; dimensions overlap. Small positive counts make slice estimates uncertain. [Notebook 13](personal/notebooks/13_final_evaluation_and_model_artifact.ipynb) also contains reliability bins and shipment-bootstrap uncertainty.
 
 Chronological evaluation estimates performance on later shipment cohorts more credibly than a random row split. It does not establish production readiness: these are synthetic examples, reporting completeness after 48 hours is an assumption, and the latest decision time is an assumed observation boundary. The 20% threshold illustrates behavior; selecting a launch threshold requires operational costs and real-data validation.
 
 ## Requirement coverage
 
-| Assignment requirement | Implementation and evidence |
-| --- | --- |
-| Point-in-time training rows and correction policy | [training.py](src/dispatch_risk/training.py) and [features.py](src/dispatch_risk/features.py) use only revisions received by the decision time. Label policy and the immature-row exception are documented in [DECISIONS.md](DECISIONS.md). |
-| Training, portable artifact, and required evaluation | [model.py](src/dispatch_risk/model.py), [training.py](src/dispatch_risk/training.py), and [evaluation.json](outputs/final_model/evaluation.json). The JSON model includes feature interpretation metadata and fitted preprocessing; the installed package supplies the versioned feature functions. |
-| Duplicate, late, corrected, and out-of-order input | [engine.py](src/dispatch_risk/engine.py) preserves delivery order and deduplicates event ID plus revision within retained history. |
-| UTC outputs, model version, and deterministic feature digest | [contracts.py](src/dispatch_risk/contracts.py), shared features, and canonical serialization. |
-| Snapshot/restore and deterministic replay | Engine state capture, integrity validation, atomic file replacement, and replay/continuation checks in [test_engine.py](tests/test_engine.py). Exact byte identity applies within the same runtime and artifact. |
-| Bounded state | Shipment capacity, per-shipment record limits, bounded record size and lookup indexes; eviction and truncation are exposed in prediction reasons and counters. |
-| Concurrent scoring and safe reload | Engine locking, candidate validation before swap, and retention of the previous model after a failed reload. |
-| Dangerous failure-mode tests | [tests](tests) covers temporal correctness, repeated replay, retention, snapshot corruption, reload, and concurrency. Run `python -m pytest`. |
-| Customer notes and timebox exclusions | [DECISIONS.md](DECISIONS.md) answers all ten customer notes with the safer contract and lists omitted work. |
-| Follow-up interview | [RUNBOOK.md](RUNBOOK.md) covers a new stream, failed-invariant investigation, and how to verify a requirement change. |
 
-**Known contract difference:** the training builder excludes immature checkpoints instead of returning a binary label for every requested decision. Unknown outcomes cannot safely be assigned zero. Requested/censored counts are recorded in metadata. [DECISIONS.md](DECISIONS.md) explains this choice; [IMPROVEMENTS.md](IMPROVEMENTS.md) records the need for an explicit censored-row or observation-boundary contract. Historical reconstruction is also limited by retained state, with degraded reasons after evidence is discarded.
+| Assignment requirement                                       | Implementation and evidence                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Point-in-time training rows and correction policy            | [training.py](src/dispatch_risk/training.py) and [features.py](src/dispatch_risk/features.py) use only revisions received by the decision time. Label policy and the immature-row exception are documented in [DECISIONS.md](DECISIONS.md).                                                         |
+| Training, portable artifact, and required evaluation         | [model.py](src/dispatch_risk/model.py), [training.py](src/dispatch_risk/training.py), and [evaluation.json](outputs/final_model/evaluation.json). The JSON model includes feature interpretation metadata and fitted preprocessing; the installed package supplies the versioned feature functions. |
+| Duplicate, late, corrected, and out-of-order input           | [engine.py](src/dispatch_risk/engine.py) preserves delivery order and deduplicates event ID plus revision within retained history.                                                                                                                                                                  |
+| UTC outputs, model version, and deterministic feature digest | [contracts.py](src/dispatch_risk/contracts.py), shared features, and canonical serialization.                                                                                                                                                                                                       |
+| Snapshot/restore and deterministic replay                    | Engine state capture, integrity validation, atomic file replacement, and replay/continuation checks in [test_engine.py](tests/test_engine.py). Exact byte identity applies within the same runtime and artifact.                                                                                    |
+| Bounded state                                                | Shipment capacity, per-shipment record limits, bounded record size and lookup indexes; eviction and truncation are exposed in prediction reasons and counters.                                                                                                                                      |
+| Concurrent scoring and safe reload                           | Engine locking, candidate validation before swap, and retention of the previous model after a failed reload.                                                                                                                                                                                        |
+| Dangerous failure-mode tests                                 | [tests](tests) covers temporal correctness, repeated replay, retention, snapshot corruption, reload, and concurrency. Run `python -m pytest`.                                                                                                                                                       |
+| Customer notes and timebox exclusions                        | [DECISIONS.md](DECISIONS.md) answers all ten customer notes with the safer contract and lists omitted work.                                                                                                                                                                                         |
+| Follow-up interview                                          | [RUNBOOK.md](personal/RUNBOOK.md) covers a new stream, failed-invariant investigation, and how to verify a requirement change.                                                                                                                                                                               |
+
+
+**Known contract difference:** the training builder excludes immature checkpoints instead of returning a binary label for every requested decision. Unknown outcomes cannot safely be assigned zero. Requested/censored counts are recorded in metadata. [DECISIONS.md](DECISIONS.md) explains this choice; [personal/IMPROVEMENTS.md](personal/IMPROVEMENTS.md) records the need for an explicit censored-row or observation-boundary contract. Historical reconstruction is also limited by retained state, with degraded reasons after evidence is discarded.
 
 The original assignment follows for reference.
 
 ---
+
+
 
 # Take-Home: Point-in-Time Risk Engine
 
@@ -211,6 +148,8 @@ Important semantics:
 - Input order is delivery order and is not guaranteed to be chronological.
 - All public outputs must use UTC-aware timestamps.
 - An incident is positive for an `as_of` time if it occurs in `(as_of, as_of + 6 hours]`.
+
+
 
 ## Required implementation
 
@@ -299,6 +238,8 @@ No clarification is available during the exercise. Make reasonable assumptions a
 - Avoid hosted APIs and external model services.
 - Dependencies must be declared in `pyproject.toml`.
 
+
+
 ## Run instructions
 
 Generate the sample data:
@@ -325,13 +266,3 @@ In a 60-minute technical interview, you will:
 - modify one requirement;
 - defend the statistical validity of your evaluation;
 - make a small code change while preserving replay determinism.
-
-## Interview API
-
-The **New stream** demo uses FastAPI. Install `python -m pip install -e '.[dev,demo]'`, stop any existing server on port 8765, and run:
-
-```bash
-PYTHONPATH=src .venv/bin/python -m uvicorn demo.api:app --host 127.0.0.1 --port 8765
-```
-
-Open [the demo](http://127.0.0.1:8765/) or [interactive API docs](http://127.0.0.1:8765/docs). Generate a stream, compare deterministic replays, change the memory limit, and run tests after a local code edit. See [demo/README.md](demo/README.md#fastapi-interview-workbench) for saved evidence, debugging and restart instructions.
