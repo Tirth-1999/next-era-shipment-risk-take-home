@@ -8,6 +8,19 @@ from pathlib import Path
 
 
 def score(artifact: Path, probe: dict) -> dict:
+    """Load the saved notebook model and predict the supplied examples.
+
+    Args:
+        artifact: Folder containing the trusted notebook model and its settings.
+        probe: Dictionary containing event messages and prediction checkpoints.
+
+    Returns:
+        A dictionary with the model version, input fingerprints and probabilities.
+
+    Raises:
+        ValueError: If saved files changed, the sklearn version differs, or a
+            calculated probability is invalid. File and import errors also propagate.
+    """
     import joblib
     import numpy as np
     import pandas as pd
@@ -45,6 +58,14 @@ def score(artifact: Path, probe: dict) -> dict:
 
 
 def main() -> None:
+    """Check a saved notebook model from the terminal.
+
+    Inputs:
+        --artifact gives the model folder; --probe gives the JSON examples file.
+
+    Returns:
+        None. Prints the result as JSON. Errors stop the command.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--artifact",type=Path,required=True)
     parser.add_argument("--probe",type=Path,required=True)

@@ -41,11 +41,11 @@ def read_jsonl(path):
 
 
 def lesson():
-    """Build the hand-crafted teaching stream used by the UI.
+    """Build the small example teaching stream used by the UI.
 
     Returns:
-        List of JSON-compatible event dictionaries that demonstrate duplicate
-        delivery, late correction, separate shipments, and a device-clock error.
+        List of event dictionaries that can be saved as JSON that demonstrate duplicate
+        delivery, late correction, separate shipments, and a wrong device timestamp.
     """
 
     def reading(eid, sid, device, received, value, revision=1):
@@ -82,7 +82,7 @@ class Demo:
 
         Args:
             artifact: Model artifact directory used by ``RiskEngine``.
-            data: Data directory used by the sample-dataset scenario.
+            data: Data directory used by the sample data example.
         """
         self.artifact = Path(artifact)
         self.data = Path(data)
@@ -98,7 +98,7 @@ class Demo:
         """Reset the walkthrough to a scenario and shipment capacity.
 
         Args:
-            scenario: ``lesson`` for the hand-crafted stream or ``sample`` for
+            scenario: ``lesson`` for the small example stream or ``sample`` for
                 the supplied dataset.
             capacity: Maximum number of shipments retained by the engine.
 
@@ -133,7 +133,7 @@ class Demo:
         self.advance(1)
 
     def advance(self, count):
-        """Ingest the next deliveries in file order.
+        """Process the next messages in file order.
 
         Args:
             count: Number of deliveries to process, capped by remaining events.
@@ -150,7 +150,7 @@ class Demo:
             self.position += 1
 
     def act(self, request):
-        """Apply one browser action and return the updated view model.
+        """Apply one browser action and return the updated information for the page.
 
         Args:
             request: Action object from ``/api/action``. Supported actions are
@@ -162,7 +162,7 @@ class Demo:
 
         Raises:
             ValueError: If the action or selected shipment/time is invalid.
-            RuntimeError: If a restore or reload invariant fails.
+            RuntimeError: If a restore or reload check fails.
         """
         with self.lock:
             action = request.get("action", "view")
@@ -262,7 +262,7 @@ class Demo:
             RuntimeError: If displayed features do not match the prediction
                 digest produced by the engine.
         """
-        # Inspect a public snapshot rather than reaching into private engine fields.
+        # Read the saved snapshot through the public interface.
         self.engine.snapshot(self.work / "inspect.json")
         state = json.loads((self.work / "inspect.json").read_text())["state"]
         retained = next(
@@ -352,7 +352,7 @@ class Demo:
         }
 
     def outcomes(self):
-        """Return retrospective reports for the currently selected shipment.
+        """Show the incident reports available now for the selected shipment.
 
         Returns:
             Dictionary with explanatory note text and the available incident
@@ -444,10 +444,10 @@ def make_handler(demo):
     sessions = Sessions(demo)
 
     class Handler(BaseHTTPRequestHandler):
-        """HTTP adapter for the browser-based shipment-risk walkthrough."""
+        """Handle browser requests for the shipment demo."""
 
         def send(self, code, body, content_type="application/json"):
-            """Send a JSON or static-file response with defensive headers."""
+            """Send a JSON or file response with defensive headers."""
             data = canonical(body) if content_type == "application/json" else body
             self.send_response(code)
             self.send_header("Content-Type", content_type)
@@ -465,7 +465,7 @@ def make_handler(demo):
             self.wfile.write(data)
 
         def do_GET(self):
-            """Serve static assets and read-only demo API routes."""
+            """Serve static assets and read only demo API routes."""
             route = urlsplit(self.path).path
             try:
                 if route == "/api/state":
@@ -483,7 +483,7 @@ def make_handler(demo):
                     "/presentation/", "/presentation.css", "/presentation.js",
                     "/presentation-slides.css",
                 ):
-                    # Explicit routes keep arbitrary workspace files inaccessible.
+                    # Only serve files named in this route list.
                     name = {
                         "/": "index.html",
                         "/presentation": "presentation.html",

@@ -1,4 +1,4 @@
-"""Validated portable JSON scoring artifact; no executable pickle at serving time."""
+"""Load, check and use the saved JSON model to calculate probabilities."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,17 +15,17 @@ MAX_ARTIFACT_BYTES = 1_000_000
 
 
 def atomic_write(path: Path, data: bytes):
-    """Write bytes to a file with replace-on-success semantics.
+    """Write a new file completely before replacing the old file.
 
     Args:
         path: Destination path.
-        data: Bytes to persist.
+        data: Bytes to save.
 
     Returns:
         ``None``. Parent directories are created when needed.
 
     Notes:
-        A temporary file is fsynced and then moved into place. If anything goes
+        The temporary file is flushed to disk and then moved into place. If anything goes
         wrong before the replace step, the previous destination file is left
         intact.
     """
@@ -46,19 +46,19 @@ def atomic_write(path: Path, data: bytes):
 
 @dataclass(frozen=True)
 class Model:
-    """Portable scoring model loaded from ``model.json``.
+    """Saved model settings loaded from ``model.json``.
 
     Attributes:
-        version: SHA-256 digest over the artifact body.
+        version: SHA-256 fingerprint calculated from the saved model settings.
         kind: Either ``logistic_regression`` or ``constant``.
-        prior: Fallback incident probability used by constant models and for
-            completely unretained shipments.
-        medians: Training medians used to impute missing numeric features.
-        means: Training means used by standard scaling.
-        scales: Training scales used by standard scaling.
-        weights: Logistic coefficients for scaled feature values followed by
-            missingness indicators.
-        intercept: Logistic intercept.
+        prior: Incident rate used by constant models and for shipments with no
+            history in memory.
+        medians: Middle values learned from training data to fill missing numbers.
+        means: Training averages subtracted when scaling the input values.
+        scales: Training scale values used to divide the centered input values.
+        weights: Learned weights for scaled inputs, followed by weights for flags
+            that show which inputs were missing.
+        intercept: Learned starting score before the weighted inputs are added.
     """
 
     version: str
@@ -99,33 +99,33 @@ class Model:
             values.append((imputed - self.means[i]) / self.scales[i])
             missing.append(float(absent))
 
-        # The exported logistic model stores coefficients for scaled values
-        # followed by explicit missingness indicators.
+        # Apply weights to scaled values first, then to the flags that show
+        # which original values were missing.
         score = self.intercept + sum(
             weight * value for weight, value in zip(self.weights, values + missing)
         )
         if score >= 0:
             return 1 / (1 + math.exp(-score))
 
-        # Equivalent sigmoid branch that avoids overflow for large negative scores.
+        # Use an equivalent probability formula that handles large negative scores.
         exp_score = math.exp(score)
         return exp_score / (1 + exp_score)
 
 
 def load_model(directory):
-    """Load and validate a portable model artifact.
+    """Read the saved model and check that it is safe to use.
 
     Args:
         directory: Directory containing ``model.json``.
 
     Returns:
-        A validated ``Model`` instance ready for serving.
+        A checked ``Model`` ready to make predictions.
 
     Raises:
-        OSError: If the artifact cannot be read.
+        OSError: If the model file cannot be read.
         ValueError: If the file is too large, the checksum does not match, the
-            feature schema is incompatible, or any numeric value is invalid.
-        KeyError: If required artifact fields are missing.
+            saved feature definitions do not match the code, or any numeric value is invalid.
+        KeyError: If required model fields are missing.
     """
     path = Path(directory) / "model.json"
     with path.open("rb") as handle:
@@ -151,7 +151,7 @@ def load_model(directory):
         raise ValueError("Unsupported model kind")
 
     def number(value):
-        """Validate one finite numeric field from the artifact."""
+        """Check that a model field is a number, excluding infinity and NaN."""
         if (
             isinstance(value, bool)
             or not isinstance(value, (int, float))
@@ -161,7 +161,7 @@ def load_model(directory):
         return float(value)
 
     def vector(name, length):
-        """Validate one fixed-length numeric vector from the artifact."""
+        """Check the length and numbers in one list of model settings."""
         values = data[name]
         if not isinstance(values, list) or len(values) != length:
             raise ValueError("Wrong model vector length")
@@ -184,8 +184,8 @@ def load_model(directory):
     if any(scale <= 0 for scale in model.scales):
         raise ValueError("Invalid feature scale")
 
-    # Smoke-test both fully missing and fully present feature shapes before
-    # serving the artifact.
+    # Try inputs with all values missing and with all values present
+    # before accepting this model.
     for probe in ({name: None for name in FEATURES}, {name: 0 for name in FEATURES}):
         probability = model.predict(probe)
         if not math.isfinite(probability) or not 0 <= probability <= 1:
@@ -194,14 +194,14 @@ def load_model(directory):
 
 
 def write_model(directory, body):
-    """Write a model body and return the validated artifact.
+    """Save the model settings and load them back to check the file.
 
     Args:
         directory: Output directory for ``model.json``.
-        body: JSON-compatible model body without ``model_version``.
+        body: Model settings that can be written as JSON, without ``model_version``.
 
     Returns:
-        The loaded ``Model`` after the artifact is written and validated.
+        The checked ``Model`` loaded from the file just written.
     """
     data = dict(body)
     data["model_version"] = hashlib.sha256(canonical(body)).hexdigest()

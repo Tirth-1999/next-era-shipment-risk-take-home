@@ -1,6 +1,6 @@
-# Tirth's interview preparation
+# My interview preparation
 
-For interview practice, use [WALKTHROUGH.md](WALKTHROUGH.md). Commands are collected below. The plan and learning journal are development history; you do not need to read them before each presentation.
+I use [WALKTHROUGH.md](WALKTHROUGH.md) to practise my explanation. Its [five-task CLI rehearsal](WALKTHROUGH.md#7-cli-rehearsal-for-the-five-follow-up-tasks) includes exact commands, a regression-test exercise, expected results and spoken explanations. Commands are collected below. My plan covers current priorities, and my learning journal keeps the development history.
 
 | Folder or file | Use |
 | --- | --- |
@@ -13,7 +13,7 @@ For interview practice, use [WALKTHROUGH.md](WALKTHROUGH.md). Commands are colle
 | `outputs/` | Notebook results, experimental model, presentation and local run evidence |
 | `tools/` | Presentation exporter and notebook-artifact verifier |
 
-Run commands from the **repository root**, not this folder:
+I run these commands from the **repository root**:
 
 ```bash
 python -m pip install -e '.[dev,demo,notebook]'
@@ -37,22 +37,22 @@ The default `pytest` command runs only the submission tests. Optional materials 
 
 Restart the API after code changes; restarting clears in-memory sessions. API docs at `/docs` load Swagger assets from a CDN.
 
-**New stream** calls `POST /api/interview/stream` with seed, shipment count and capacity. The backend calls the supplied deterministic generator, then replays delivery order twice through the saved model. It writes raw data, both prediction streams, snapshots and `report.json` under a unique `personal/outputs/interview/` folder. Files are retained for inspection; remove unwanted run folders manually. It compares prediction and snapshot hashes and checks shipment capacity after every delivery. It reports the first capacity violation if one occurs. A replay mismatch requires comparing the two saved files; no failure is fabricated.
+**New stream** calls `POST /api/interview/stream` with seed, shipment count and capacity. The backend calls the supplied generator that repeats the same data for the same seed, then replays delivery order twice through the saved model. It writes raw data, both prediction streams, snapshots and `report.json` under a unique `personal/outputs/interview/` folder. Files are retained for inspection; remove unwanted run folders manually. It compares prediction and snapshot hashes and checks shipment capacity after every delivery. It reports the first capacity violation if one occurs. A replay mismatch requires comparing the two saved files; no failure is fabricated.
 
-Use the same seed with a different memory limit to demonstrate a requirement change. For a code change, edit the implementation and its test locally; **Run repository tests** starts pytest in a fresh process. Restart the API before replaying changed engine code. The UI does not edit source automatically. Repeated generation tests robustness, not accuracy on independent real data. The original held-out report remains separate.
+Use the same seed with a different memory limit to demonstrate a requirement change. For a code change, edit the implementation and its test locally; **Run repository tests** starts pytest in a fresh process. Restart the API before replaying changed engine code. The UI does not edit source automatically. Repeated generation tests robustness, not accuracy on independent real data. The original final test report remains separate.
 
 ## Page purposes
 
 - **Start here:** demonstrate a duplicate and a late correction.
 - **System checks:** exercise memory capacity, recovery and rejected model reload.
 - **Model results:** compare incident detection and probability quality against the baseline.
-- **New stream:** generate inputs and check deterministic replay.
+- **New stream:** generate inputs and check replay that produces the same saved bytes.
 
 ## CLI replay and recovery
 
 See the [submission README](../README.md#run-the-submission) for core setup, training and tests. Run commands below from the repository root. With the existing virtual environment, use `PYTHONPATH=src .venv/bin/python` in place of `python`.
 
-`train` writes `model.json` and `evaluation.json`. The CLI prints validation, held-out model/baseline metrics and operational slices. The model family was selected in the validation notebook. This command fits that family without selecting again on test results. `replay` preserves input delivery order, writes one canonical prediction per accepted delivery at that delivery's `received_at`, writes `snapshot.json`, and prints memory counters. Scoring an old received timestamp after eviction may intentionally produce a degraded result.
+`train` writes `model.json` and `evaluation.json`. The CLI prints validation, final test model/baseline metrics and results for useful groups of shipments. The model family was selected in the validation notebook. This command fits that family without selecting again on test results. `replay` preserves input delivery order, writes one prediction written in a fixed format per accepted delivery at that delivery's `received_at`, writes `snapshot.json`, and prints memory counters. Scoring an old received timestamp after removal of shipment history may intentionally produce a degraded result.
 
 To reproduce another stream without replacing the original data:
 
@@ -61,7 +61,7 @@ python tools/generate_dataset.py --seed 1927 --shipments 700 --output /tmp/dispa
 python -m dispatch_risk replay --data /tmp/dispatch-unseen --artifact outputs/final_model --max-shipments 32 --output /tmp/dispatch-unseen-replay
 ```
 
-This checks input robustness with the existing model; it is not a new estimate of predictive quality. To compare deterministic replays, run `replay` twice into separate directories and compare `predictions.jsonl` and `snapshot.json` with `cmp`.
+This checks handling of different inputs with the existing model; it is not a new estimate of predictive quality. To compare repeated runs, run `replay` twice into separate directories and compare `predictions.jsonl` and `snapshot.json` with `cmp`.
 
 First create the replay snapshot:
 
@@ -81,7 +81,7 @@ assert engine.reload_model(Path('outputs/final_model'))
 assert not engine.reload_model(Path('missing-model'))  # Previous model still active.
 ```
 
-Restore requires the snapshot's model version. Keep the corresponding model directory alongside the snapshot. See `DECISIONS.md` for retention, label-censoring and initial-load failure policies.
+Restore requires the snapshot's model version. Keep the corresponding model directory alongside the snapshot. See `DECISIONS.md` for retention, leaving out outcomes that are still unknown and failure to load the first model policies.
 
 ## Browser presentation
 
@@ -109,4 +109,4 @@ To check every notebook with this environment in a temporary copy:
 .venv/bin/python personal/tools/check_notebooks.py
 ```
 
-The checker runs all 14 notebooks in order with fresh kernels and stops on the first error. It leaves the saved notebooks, tables and model artifacts unchanged. Allow roughly a minute locally; runtime depends on the machine.
+The checker runs all 14 notebooks in order with fresh kernels and stops on the first error. It leaves the saved notebooks, tables and saved model filess unchanged. Allow roughly a minute locally; runtime depends on the machine.

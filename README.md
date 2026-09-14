@@ -1,6 +1,6 @@
 # Shipment Risk Engine
 
-A local Python engine for six-hour refrigerated-shipment incident risk. It reconstructs what was known at each decision time, trains a model, and serves deterministic predictions with bounded history.
+I built this Python program to predict the chance of a shipment incident in the next six hours. It uses the information available at the requested time and keeps shipment history within memory limits.
 
 ## Run the submission
 
@@ -13,7 +13,7 @@ python -m dispatch_risk train --artifact outputs/final_model
 python -m dispatch_risk replay --artifact outputs/final_model --max-shipments 32 --output outputs/replay
 ```
 
-The sample data and portable model are included. To regenerate sample data, run `python tools/generate_dataset.py`. Training and scoring run offline after dependencies are installed. See [run instructions](personal/README.md) for fresh-stream and recovery commands, and [DECISIONS.md](DECISIONS.md) for policies and limitations.
+The sample data and saved model are included. To regenerate sample data, run `python tools/generate_dataset.py`. Training and scoring run offline after dependencies are installed. See [run instructions](personal/README.md) for new stream and recovery commands, and [DECISIONS.md](DECISIONS.md) for policies and limitations.
 
 ## Repository layout
 
@@ -21,7 +21,7 @@ The sample data and portable model are included. To regenerate sample data, run 
 | --- | --- |
 | `src/dispatch_risk/` | Public implementation |
 | `tests/` | Submission tests |
-| `tools/generate_dataset.py` | Supplied deterministic generator |
+| `tools/generate_dataset.py` | Supplied generator that repeats the same data for the same seed |
 | `data/` | Source sample records |
 | `outputs/final_model/` | Portable model, evaluation and verification evidence |
 | `personal/` | Optional notebooks, learning notes, UI and interview preparation |
@@ -30,13 +30,13 @@ The assessed package and core tests do not depend on `personal/`. That folder ca
 
 ## Evaluation results
 
-These results come from the saved [evaluation report](outputs/final_model/evaluation.json) on synthetic data: **309 held-out decision rows, including 25 positives**.
+These results come from the saved [evaluation report](outputs/final_model/evaluation.json) on synthetic data: **309 final test decision rows, including 25 positives**.
 
-**Split rule:** order shipments by their first decision timestamp and form approximately 60% training, 20% validation, and 20% test cohorts. Shipments do not overlap between partitions, and timestamp ties stay together. Training outcomes must mature by validation start, validation outcomes by test start, and test outcomes by the observation cutoff. Maturity requires the six-hour outcome window plus a 48-hour reporting allowance. Label availability is checked at each fit cutoff; preprocessing is fitted only on the fitting partition.
+**Split rule:** order shipments by their first decision timestamp and form approximately 60% training, 20% validation, and 20% test groups of shipments. Shipments do not overlap between groups, and timestamp ties stay together. The six hour prediction window and 48 hour reporting wait must end before each group is used. Training answers must be ready before validation starts, validation answers before the test starts, and test answers before observation ends. We recheck report arrival times at each cutoff. Values used to fill missing data and scale inputs come only from fitting rows.
 
 For the saved run, validation starts on February 15, 2026 at 08:00 UTC; test starts on March 2 at 08:00 UTC; observation ends on March 17 at 11:00 UTC. These boundaries are derived from the supplied data, not hard-coded dates.
 
-Constant, logistic regression, shallow tree, random forest, and gradient boosting were compared on validation data. The selection rule required better average precision and Brier score than the constant baseline, then selected the simplest model within 0.002 Brier of the best eligible model. Logistic regression was selected before test evaluation and refitted on mature development data available at test start.
+Constant, logistic regression, shallow tree, random forest, and gradient boosting were compared on validation data. The selection rule required better average precision and Brier score than the constant comparison model, then selected the simplest model within 0.002 Brier of the best eligible model. Logistic regression was selected before test evaluation and refitted on earlier data whose reporting wait has passed available at test start.
 
 
 | Held-out metric                                    | Logistic regression | Constant baseline |
@@ -44,13 +44,13 @@ Constant, logistic regression, shallow tree, random forest, and gradient boostin
 | Average precision (higher is better)               | 0.981277            | 0.080906          |
 | Brier score (lower is better)                      | 0.003760            | 0.074380          |
 | Log loss (lower is better)                         | 0.020847            | 0.281113          |
-| Recall at illustrative 20% threshold               | 96%                 | 0%                |
+| Recall at illustrative 20% alert cutoff               | 96%                 | 0%                |
 | True positives / false negatives / false positives | 24 / 1 / 0          | 0 / 25 / 0        |
 
 
-The constant baseline gives every example the incident prevalence learned from mature development rows. Average precision measures how well incidents rank above non-incidents. Brier score measures squared probability error; it assesses probability quality but does not by itself prove calibration.
+The constant comparison model gives every example the same probability: the incident rate in earlier fitting rows. Average precision measures how well incidents rank above non-incidents. Brier score measures squared probability error; it assesses probability quality but does not by itself prove calibration.
 
-Operational slices check whether performance changes across sensor sources, stale measurements, or missing trend evidence:
+Results for useful groups of shipments check whether performance changes across sensor sources, stale measurements, or missing trend evidence:
 
 
 | Slice                             | Rows | Positives | Average precision | Brier score | Recall at 20% |
@@ -64,28 +64,28 @@ Operational slices check whether performance changes across sensor sources, stal
 | Temperature trend present         | 232  | 16        | 0.980978          | 0.004343    | 93.8%         |
 
 
-Slices within each dimension partition the test rows; dimensions overlap. Small positive counts make slice estimates uncertain. [Notebook 13](personal/notebooks/13_final_evaluation_and_model_artifact.ipynb) also contains reliability bins and shipment-bootstrap uncertainty.
+Each comparison divides the test rows by one property. A row can appear in a source group and an age group. Small positive counts make slice estimates uncertain. [Notebook 13](personal/notebooks/13_final_evaluation_and_model_artifact.ipynb) also contains groups comparing predicted risk with the observed incident rate and uncertainty estimated by repeatedly resampling whole shipments.
 
-Chronological evaluation estimates performance on later shipment cohorts more credibly than a random row split. It does not establish production readiness: these are synthetic examples, reporting completeness after 48 hours is an assumption, and the latest decision time is an assumed observation boundary. The 20% threshold illustrates behavior; selecting a launch threshold requires operational costs and real-data validation.
+Evaluation on later shipments estimates performance on later groups more credibly than a random row split. It does not establish readiness for real use: these are synthetic examples, reporting completeness after 48 hours is an assumption, and the latest decision time is an assumed end of observation. The 20% alert cutoff illustrates behavior; selecting a launch threshold requires operational costs and real data validation.
 
 ## Requirement coverage
 
 
 | Assignment requirement                                       | Implementation and evidence                                                                                                                                                                                                                                                                         |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Point-in-time training rows and correction policy            | [training.py](src/dispatch_risk/training.py) and [features.py](src/dispatch_risk/features.py) use only revisions received by the decision time. Label policy and the immature-row exception are documented in [DECISIONS.md](DECISIONS.md).                                                         |
-| Training, portable artifact, and required evaluation         | [model.py](src/dispatch_risk/model.py), [training.py](src/dispatch_risk/training.py), and [evaluation.json](outputs/final_model/evaluation.json). The JSON model includes feature interpretation metadata and fitted preprocessing; the installed package supplies the versioned feature functions. |
-| Duplicate, late, corrected, and out-of-order input           | [engine.py](src/dispatch_risk/engine.py) preserves delivery order and deduplicates event ID plus revision within retained history.                                                                                                                                                                  |
-| UTC outputs, model version, and deterministic feature digest | [contracts.py](src/dispatch_risk/contracts.py), shared features, and canonical serialization.                                                                                                                                                                                                       |
-| Snapshot/restore and deterministic replay                    | Engine state capture, integrity validation, atomic file replacement, and replay/continuation checks in [test_engine.py](tests/test_engine.py). Exact byte identity applies within the same runtime and artifact.                                                                                    |
-| Bounded state                                                | Shipment capacity, per-shipment record limits, bounded record size and lookup indexes; eviction and truncation are exposed in prediction reasons and counters.                                                                                                                                      |
+| Training inputs and correction rules            | [training.py](src/dispatch_risk/training.py) and [features.py](src/dispatch_risk/features.py) use only revisions received by the decision time. Label policy and the rows still waiting for reports exception are documented in [DECISIONS.md](DECISIONS.md).                                                         |
+| Training, saved model files, and required evaluation         | [model.py](src/dispatch_risk/model.py), [training.py](src/dispatch_risk/training.py), and [evaluation.json](outputs/final_model/evaluation.json). The JSON model includes feature interpretation metadata and saved input preparation settings; the installed package supplies the versioned feature functions. |
+| Duplicate, late, corrected, and out-of-order input           | [engine.py](src/dispatch_risk/engine.py) preserves delivery order and deduplicates event ID plus revision within stored history.                                                                                                                                                                  |
+| UTC outputs, model version, and repeatable feature fingerprint | [contracts.py](src/dispatch_risk/contracts.py), shared features, and writing JSON in a fixed format.                                                                                                                                                                                                       |
+| Snapshot/restore and replay that produces the same saved bytes                    | Engine state capture, integrity validation, replacing a file only after the new file is ready, and replay/continuation checks in [test_engine.py](tests/test_engine.py). Exact byte matching applies within the same runtime and artifact.                                                                                    |
+| Bounded state                                                | Shipment capacity, record limits for each shipment, limits on record size and lookup indexes; removal of shipment history and truncation are exposed in prediction reasons and counters.                                                                                                                                      |
 | Concurrent scoring and safe reload                           | Engine locking, candidate validation before swap, and retention of the previous model after a failed reload.                                                                                                                                                                                        |
-| Dangerous failure-mode tests                                 | [tests](tests) covers temporal correctness, repeated replay, retention, snapshot corruption, reload, and concurrency. Run `python -m pytest`.                                                                                                                                                       |
+| Dangerous failure-mode tests                                 | [tests](tests) covers temporal correctness, repeated replay, retention, snapshot corruption, reload, and overlapping calls. Run `python -m pytest`.                                                                                                                                                       |
 | Customer notes and timebox exclusions                        | [DECISIONS.md](DECISIONS.md) answers all ten customer notes with the safer contract and lists omitted work.                                                                                                                                                                                         |
 | Follow-up interview                                          | [run instructions](personal/README.md) covers a new stream, failed-invariant investigation, and how to verify a requirement change.                                                                                                                                                                               |
 
 
-**Known contract difference:** the training builder excludes immature checkpoints instead of returning a binary label for every requested decision. Unknown outcomes cannot safely be assigned zero. Requested/censored counts are recorded in metadata. [DECISIONS.md](DECISIONS.md) explains this choice; [improvement priorities](personal/WALKTHROUGH.md#10-improvement-priorities) records the need for an explicit censored-row or observation-boundary contract. Historical reconstruction is also limited by retained state, with degraded reasons after evidence is discarded.
+**Known contract difference:** the training builder excludes checkpoints still waiting for reports instead of returning a binary label for every requested decision. Unknown outcomes cannot safely be assigned zero. Requested/censored counts are recorded in metadata. [DECISIONS.md](DECISIONS.md) explains this choice; [remaining improvements in walkthrough section 10](personal/WALKTHROUGH.md#10-improvement-priorities) records the need for an explicit censored-row or observation-boundary contract. Historical reconstruction is also limited by stored history, with reasons why information is missing or old after evidence is discarded.
 
 The original assignment follows for reference.
 

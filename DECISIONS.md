@@ -1,58 +1,142 @@
-# Decision record
+# Decisions
 
-## Event time and knowledge time
+These are my decisions for the submission. I rejected all ten customer suggestions as written. For each one, I explain why and identify the rule I implemented.
 
-Preserve delivery order at ingest. At scoring time, select the highest revision **available by `as_of`**, then interpret device time. A later correction never replaces an earlier decision's inputs before its `received_at`. Duplicate identity is `(event_id, revision)`; conflicting contents and changing an event's shipment are rejected atomically. IDs belong to one shipment while retained. Lower revisions can add historical information even after a higher revision has arrived.
+## 1. Use a random 80/20 row split
 
-Timestamps must have explicit timezones and are normalized to UTC. A measurement claiming a time later than its own receipt is excluded, with a degraded reason. This conservative policy can discard genuine clock-skewed data. An invalid correcting measurement does not resurrect the older revision. Finite numeric temperatures are used; other kinds remain in bounded history but are not model features. Latest measurement may be older than three hours; scoring then flags staleness.
+**My decision: I reject this suggestion. Split shipments by time into training, validation and test groups.**
 
-## Labels and evaluation
+A random row split can put checkpoints from the same shipment on both sides and mix earlier and later examples. That weakens the estimate of future performance.
 
-We allow 48 hours for reports after the six-hour outcome window ends. The same waiting rule applies to positive and negative examples. Reports must have `label_available_at <= cutoff`; positives require an incident in `(decision_time, decision_time + 6 hours]`. Absence of an incident becomes an **assumed negative**, not a certified negative. The 48/72/96-hour exploration found no observed later-report contradictions; that does not prove completeness.
+Order shipments by their first decision time and use approximately 60/20/20 groups. Keep each shipment and equal start times together. Check results by sensor source separately; do not force every source into every time period. Learn missing value replacements and scaling values only from fitting rows.
 
-The public builder has no observation-cutoff argument. It uses the latest supplied decision timestamp as the assumed end of observation. The builder returns only mature checkpoints. This departs from the README’s request for a binary label at every checkpoint because recent outcomes may still be unknown. Metadata reports requested/censored counts. A single recent checkpoint can therefore return no rows; `train([])` raises a clear error. Production use needs a certified observation boundary or a separate censored-row contract. Caller-supplied `TrainingRow`s without incident metadata assert the supplied labels are complete; they still receive a maturity gate.
+**Implemented in:** [training.py](src/dispatch_risk/training.py).
 
-Split by shipment's first decision timestamp into approximately 60/20/20 chronological cohorts, without shared shipments. Timestamp ties stay together. Train labels mature by validation start, validation labels by test start, test labels by the assumed observation cutoff. Report availability is rechecked at each fit cutoff. Training-only median imputation, scaling, and missing indicators prevent preprocessing leakage. Sparse or one-class development data produces a constant model; insufficient holdout data is reported with unavailable metrics left empty. With no training partition, the validation fallback is a fixed 0.5, never a prevalence learned from future rows.
+## 2. Always apply the newest event revision
 
-## Features, model, artifact
+**My decision: I reject this suggestion. Use the highest revision that had arrived by the requested decision time.**
 
-Nine features: latest temperature, measurement age, arrival delay, missing-temperature indicator, and count/mean/max/trend/span within `(as_of - 3 hours, as_of]`. Trend is an ordinary least-squares slope in degrees/hour using actual timestamps; fewer than two distinct times means missing, not zero. Mean is observation-weighted. Training and scoring use the same functions in `features.py`. Missing numerical values receive fitted medians and explicit indicators; logistic values are standardized. All nine indicators are retained even if redundant.
+A correction received at noon was unavailable to an 11 AM prediction. Applying it would use future information.
 
-Notebooks compared constant, logistic, shallow tree, forest and gradient boosting. The declared selection rule required improvements in validation AP and Brier over constant, then picked the simplest within 0.002 Brier of the best eligible model. Logistic was selected before test evaluation. Public `train` fits that fixed family and refits mature development data at test start. It does not reselect using test outcomes.
+Filter revisions by `received_at <= as_of` before choosing the highest revision. Keep older revisions while their history remains stored so earlier predictions can be reconstructed.
 
-Public training reproduces the notebook test results: 309 rows, 25 positives; AP 0.981277, Brier 0.003760, log loss 0.020847. Constant AP 0.080906 and Brier 0.074380. At illustrative threshold 0.2: 24 true positives, one false negative, zero false positives. Source, measurement freshness, and missing trend slices are reported. Notebook 13 also includes reliability bins and shipment-bootstrap uncertainty. The results come from synthetic data. We have not chosen an operating threshold or fitted a separate probability calibrator.
+**Implemented in:** `known_revisions` in [features.py](src/dispatch_risk/features.py).
 
-Serving uses a small JSON artifact, not executable pickle. It stores the feature version/order/window, fitted imputation/scaling parameters, coefficients, prior, training cutoff, training-data digest and library version. Canonical content SHA-256 is the model version. The installed `dispatch_risk` package supplies the versioned feature interpreter; incompatible artifacts fail validation. The exported model’s probabilities are checked against the fitted sklearn pipeline to 1e-12. Exact replay guarantees apply to the same runtime/artifact; different math libraries or platforms can introduce floating-point differences. Hashes detect accidental damage, not malicious replacement.
+## 3. Sort everything by device time before replay
 
-## Memory, eviction, and idempotency
+**My decision: I reject this suggestion. Process messages in their supplied delivery order.**
 
-A lock protects an insertion-ordered map of at most `max_shipments` shipment states. Successful ingest refreshes recency; score and exact duplicate deliveries do not. Evict the least recently updated shipment, including its event-ID index entries. Each shipment retains at most 128 revision records; each normalized record is at most 16 KiB, IDs at most 256 characters. The cap covers both records and the event-ID lookup index. These rules bound stored data; they do not impose an exact process-memory limit: worst-case stored JSON is about 64 MiB for 32 shipments, plus Python object overhead.
+Sorting by device time changes when the engine sees a message and can also change which shipment histories are removed from memory. Device clocks can be wrong.
 
-If a shipment exceeds its record budget, remove all revisions of the event whose latest receipt is oldest, with event ID as a tie breaker. Keep one discard-time watermark per shipment; deliveries at or before it cannot resurrect forgotten records. Whole-event trimming can discard many revisions at once. A prediction from truncated history always carries `history_truncated`, even if a particular recent window might be complete.
+Use receipt time to decide whether a reading was available. Use device time to calculate reading age and temperature windows after that check. Exclude readings whose device time is later than their receipt time and return an explanation. An unusable correction does not bring back its older reading.
 
-The engine does not keep a growing list of every evicted shipment. If one returns, it starts with a new history. This means duplicate recognition and event-ID ownership checks cannot extend across eviction. New shipment states after any eviction conservatively carry `retention_coverage_unverified`. Unknown shipments receive the fitted prior and degraded reasons. Exact historical reconstruction is supported while the relevant history is retained; degraded predictions expose the limitation afterward. Finite memory means some very late deliveries can no longer be matched against their full history. `stats()` exposes caps, retained/index counts, accepted deliveries, evictions and trimming.
+**Implemented in:** [__main__.py](src/dispatch_risk/__main__.py) and [features.py](src/dispatch_risk/features.py).
 
-## Concurrency, snapshots, reload
+## 4. Deduplicate on shipment ID
 
-An `RLock` serializes ingest, score, snapshot capture and stats. Each score uses one model and a consistent view of the retained readings. Reload reads, validates and smoke-tests a candidate outside the lock, then swaps one reference under the lock. Failure returns false without changing model or state. If the initial model cannot load, startup fails rather than returning an unsupported zero-risk result.
+**My decision: I reject this suggestion. Identify a repeated message by event ID and revision.**
 
-Snapshots encode canonical JSON under the lock, including LRU order, records, discard watermarks, coverage flags, counters and model version. Writing uses a temporary file, flush/fsync and atomic rename. Restore checks integrity, schema, bounds and identities before returning an engine, and requires the same model version. The model artifact is supplied separately. Concurrent snapshots each capture a consistent state, although last rename wins when writers target the same path. This is single-process file replacement; broker offsets, multi-process coordination and filesystem power-loss guarantees beyond file fsync are not implemented.
+One shipment has many valid readings. Deduplicating by shipment would discard them.
 
-## Responses to the customer notes
+An exact repeated delivery has no extra effect. Reject different contents for the same event ID and revision, or an event ID moving to another shipment. These checks apply while the identifying history remains in memory.
 
-1. **Random row split:** rejected; chronological, shipment-disjoint cohorts better estimate future use.
-2. **Always newest revision:** rejected; only revisions available by the decision are eligible.
-3. **Sort replay by device time:** rejected; preserve delivery order, use device time only inside eligible feature calculations.
-4. **Deduplicate shipment ID:** rejected; deduplicate event ID plus revision within retained history.
-5. **Kafka guarantees snapshot consistency:** rejected; application state capture and atomic replacement are implemented independently of a broker.
-6. **Load failure means zero risk:** rejected; retain the last valid model, or fail initial startup.
-7. **Full incident table in features:** rejected; incidents are outcomes only, restricted by label availability.
-8. **AUC > 0.90 sufficient for launch:** rejected; AP, probability error, baseline, slices and uncertainty matter; real-data validation and operational costs remain necessary.
-9. **Keep every shipment:** rejected; enforce shipment and record caps with explicit retention limitations.
-10. **Reload clears state:** rejected; only the immutable model reference changes.
+**Implemented in:** `ingest` in [engine.py](src/dispatch_risk/engine.py).
 
-## Scope and reproduction
+## 5. Rely on Kafka for snapshot consistency
 
-Implemented the public builder, training, engine, CLI, snapshots/restore, bounded retention, model reload, and focused invariant tests. See `personal/README.md` for exact commands. Not implemented: broker offset transactions, real-time SLA/load testing, distributed state, authenticated model signing, automatic drift retraining, or features from door/compressor/location. The implementation is intended for the local exercise; these remain outside its scope.
+**My decision: I reject this suggestion. The application must save a consistent copy of its own history.**
 
-Generated files in `data/` total approximately 0.40 MB when individually gzip-compressed, below the 5 MB requirement. Notebook learning artifacts are retained separately from the portable serving artifact. No network is required for training/scoring after declared dependencies are installed. Verification here used Python 3.14; the declared minimum is 3.11 but that version was not separately tested.
+A messaging system's delivery guarantees do not make changes to this engine's memory and local files one transaction. This submission does not use Kafka.
+
+Hold the engine lock while capturing history, ordering, counters and model version. Write a temporary file, flush it to disk, then replace the destination. Restore checks the snapshot contents and requires the matching model version. Saving broker positions together with engine history is not implemented.
+
+**Implemented in:** `snapshot` and `restore` in [engine.py](src/dispatch_risk/engine.py), and `atomic_write` in [model.py](src/dispatch_risk/model.py).
+
+## 6. Return zero risk when a model cannot load
+
+**My decision: I reject this suggestion. Keep the previous valid model after a failed reload. Stop startup if no valid model can be loaded.**
+
+Zero is a prediction of no incident risk. A model loading error provides no evidence for that prediction.
+
+`reload_model` returns `False` on failure and leaves the current model and shipment history intact. The constructor raises an error if the initial model is invalid.
+
+**Implemented in:** [engine.py](src/dispatch_risk/engine.py) and [model.py](src/dispatch_risk/model.py).
+
+## 7. Use the full incident table to generate features
+
+**My decision: I reject this suggestion. Use incident reports to build training answers only.**
+
+An incident report can arrive after the prediction. Putting it into the model inputs would reveal the outcome being predicted.
+
+Build features from shipment messages available at the checkpoint. Build labels from incidents in `(decision_time, decision_time + 6 hours]`, using only reports available by the relevant training or evaluation cutoff. Apply the reporting wait described below.
+
+**Implemented in:** `build_training_rows` and `_label` in [training.py](src/dispatch_risk/training.py).
+
+## 8. Treat AUC above 0.90 as sufficient for launch
+
+**My decision: I reject this suggestion. These synthetic test results do not justify a production launch.**
+
+One ranking score does not establish probability accuracy, acceptable false alarms, or performance across operational groups.
+
+Report average precision, Brier score, log loss, a constant baseline, and results by source, reading age and missing trend. The final test has 309 checkpoints and 25 positives: average precision 0.981277 and Brier 0.003760, against baseline values of 0.080906 and 0.074380. At the demonstration cutoff of 20%, the model catches 24 positive checkpoints, misses one and raises no false alarms.
+
+Real deployment requires confirmed report coverage, evaluation on real shipments, and an alert cutoff based on incident costs and response capacity. No production cutoff has been selected.
+
+**Evidence:** [evaluation.json](outputs/final_model/evaluation.json). Notebook 13 adds calibration plots and uncertainty estimates by resampling whole shipments.
+
+## 9. Keep every shipment in memory
+
+**My decision: I reject this suggestion. Enforce the shipment limit and limits on each shipment's records.**
+
+Unlimited history violates the required memory contract. One busy shipment can also grow indefinitely unless its records are capped.
+
+Keep at most `max_shipments` histories and 128 revision records per shipment. Limit each stored event to 16 KiB and each ID to 256 characters. Remove the shipment updated longest ago when capacity is reached, including its event ID lookup entries. Accepted new messages update that order; scores and exact duplicates do not.
+
+When trimming one shipment, remove all revisions of the selected event together. Remember the latest removed receipt time and reject arrivals at or before it. Return `history_truncated` for shortened histories and `retention_coverage_unverified` for new histories after a shipment removal. Exact duplicate recognition and historical reconstruction are limited by the history still stored. Unknown shipments receive the fitted prior incident rate with reasons explaining the missing history.
+
+These limits bound stored data. They do not enforce an exact process RAM ceiling.
+
+**Implemented in:** [engine.py](src/dispatch_risk/engine.py). [Engine tests](tests/test_engine.py) cover capacity, record trimming and lookup cleanup.
+
+## 10. Allow model reload to clear history
+
+**My decision: I reject this suggestion. Replace the model while preserving all shipment history.**
+
+Even during low traffic, clearing history removes the readings needed by the next prediction.
+
+Read and check the candidate model before taking the lock. Hold the lock briefly to replace the model reference. Each score uses one model and a consistent view of history. A failed reload leaves both unchanged.
+
+**Implemented in:** `reload_model` and `score` in [engine.py](src/dispatch_risk/engine.py). Tests cover overlapping ingestion, scoring and reload calls.
+
+## Label policy and the known contract gap
+
+**My decision: I wait six hours for the prediction window and another 48 hours for reports. Leave examples with unknown outcomes out of training.**
+
+The wait applies to both classes. After it passes, a matching incident gives label 1; no matching report gives label 0 under an explicit completeness assumption. Checks with 48, 72 and 96 hour waits found no later contradictions in those examples. They do not prove reporting completeness.
+
+The builder has no observation cutoff input, so it uses the latest supplied decision time as the assumed end of observation. Training labels must be ready before validation starts, validation labels before test starts, and test labels before observation ends. Report availability is checked again at each cutoff.
+
+**Unmet requirement:** the README requests a binary label at every checkpoint. The implementation omits checkpoints still waiting for reports and records requested and excluded counts. A single recent checkpoint can return no rows; `train([])` raises an error. This gap is not fixed. Resolving it requires an agreed representation of unknown outcomes and a confirmed observation cutoff. External `TrainingRow` callers without incident details take responsibility for label completeness; the waiting rule still applies.
+
+## Model and input choices
+
+**My decision: I use shared temperature features and the logistic regression family selected on validation data.**
+
+The nine inputs cover latest temperature, age, delay, missing temperature, and the count, average, maximum, trend and time span in `(as_of - 3 hours, as_of]`. Trend fits a straight line using actual times; it needs two distinct times. Each reading has equal weight in the average. Training and prediction share the same functions. Fill missing numbers with training medians, add nine missing value flags, and use fitted scaling values for logistic regression.
+
+Validation compared constant, logistic regression, a small tree, random forest and gradient boosting. Require better average precision and Brier than constant, then choose the simplest model within 0.002 Brier of the best qualifying model. Logistic regression met that rule. Public training fits this fixed family on earlier eligible data; final test answers do not select the model. Too little fitting data or one answer class produces a constant model. Unavailable test metrics stay empty. With no training group, the validation fallback is fixed at 0.5.
+
+Save weights, input preparation settings, feature definitions, training details and version information in JSON. Check exported probabilities against sklearn within 1e-12. Replay comparisons require the same runtime, model, settings and delivery sequence. Different math libraries can produce tiny numeric differences. Content fingerprints detect changed files but do not authenticate their publisher.
+
+## Work I did not implement within the timebox
+
+- Kafka integration or coordinated saving of broker positions and engine history.
+- Distributed storage or coordination between multiple processes.
+- Measured response time, load targets or an exact process RAM ceiling.
+- Model signing, automatic retraining or a separate probability calibration model.
+- Features from door, compressor or location data, or prediction of incident severity.
+- Validation on real shipment data or a production alert cutoff.
+- A complete resolution of the per-checkpoint training-row contract above.
+- Separate testing on Python 3.11; verification used Python 3.14.
+
+The implemented package trains and scores offline after dependencies are installed. The UI and notebooks are optional preparation materials. Run commands are in [personal/README.md](personal/README.md).

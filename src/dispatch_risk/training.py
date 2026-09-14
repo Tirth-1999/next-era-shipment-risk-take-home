@@ -1,4 +1,4 @@
-"""Point-in-time examples and chronological evaluation of the selected model family."""
+"""Build training examples and check the selected model on later shipments."""
 from __future__ import annotations
 
 from collections import defaultdict
@@ -26,7 +26,7 @@ GRACE = timedelta(hours=48)
 
 
 def build_training_rows(events, labels, decision_times):
-    """Create mature point-in-time examples from events, labels, and checkpoints.
+    """Build training examples once enough time has passed for incident reports.
 
     Args:
         events: Iterable of ``TelemetryEvent`` objects in delivery order.
@@ -39,7 +39,7 @@ def build_training_rows(events, labels, decision_times):
     Returns:
         List of ``TrainingRow`` objects. Rows whose six-hour outcome window plus
         48-hour reporting grace has not completed by the observation cutoff are
-        excluded rather than silently labeled negative.
+        left out because their outcomes may still be unknown.
 
     Raises:
         ValueError: If event or incident identities conflict, timestamps are
@@ -125,8 +125,8 @@ def build_training_rows(events, labels, decision_times):
     )
 
     for shipment_id, decision_time in decisions:
-        # Do not turn "not yet knowable" into label 0. The row becomes usable
-        # only after the outcome horizon and reporting allowance have both passed.
+        # Wait until the prediction window and extra reporting time have passed.
+        # Until then, the answer may still be unknown.
         eligible_at = decision_time + HORIZON + GRACE
         if eligible_at > cutoff:
             continue
@@ -187,16 +187,16 @@ def build_training_rows(events, labels, decision_times):
 
 
 def _label(row, cutoff):
-    """Resolve a row label as of a training or evaluation cutoff.
+    """Find the incident answer using reports available by the given time.
 
     Args:
-        row: Candidate training row.
-        cutoff: Time by which outcome reports are assumed observable.
+        row: Training example to check.
+        cutoff: Last time at which reports can be used for this check.
 
     Returns:
-        ``1`` for an incident inside the horizon, ``0`` for an eligible
-        no-incident row, or ``None`` when the row is still immature at the
-        supplied cutoff.
+        ``1`` for an incident in the prediction window. ``0`` when the
+        waiting period has passed and no incident is reported. ``None`` when
+        we must still wait for reports.
     """
     if row.decision_time + HORIZON + GRACE > cutoff:
         return None
@@ -217,29 +217,29 @@ def _label(row, cutoff):
     if available is not None and utc(available) > cutoff:
         return None
 
-    # External TrainingRows: caller asserts label completeness, with default 48h maturity.
+    # For external rows, the caller confirms the labels. Still apply the 48 hour wait.
     return row.label
 
 
 def train(rows, artifact_dir):
-    """Train the portable model artifact and write evaluation output.
+    """Fit the model, save its settings, and write a report of its performance.
 
     Args:
-        rows: Mature ``TrainingRow`` examples. Rows are split by chronological
-            shipment cohort into train, validation, development, and test
-            groups.
+        rows: ``TrainingRow`` examples whose reporting wait has passed. Shipments
+            are grouped by time for training, model comparison, and final testing.
+            Development data combines the earlier groups when fitting the final model.
         artifact_dir: Directory where ``model.json`` and ``evaluation.json``
             will be written.
 
     Returns:
         Evaluation report dictionary containing split boundaries, validation
-        metrics, held-out metrics, slice metrics, limitations, model kind, and
+        metrics, results on the final test group, results for smaller groups, limitations, model kind, and
         model version.
 
     Raises:
         ValueError: If no usable rows are supplied, duplicate checkpoints are
             present, labels/features are invalid, dataset cutoffs are mixed, or
-            the portable scorer disagrees with the fitted sklearn pipeline.
+            the saved model gives different probabilities from the fitted sklearn model.
     """
     import numpy as np
     import pandas as pd
@@ -289,7 +289,7 @@ def train(rows, artifact_dir):
     ordered = sorted(first, key=lambda shipment_id: (first[shipment_id], shipment_id))
 
     def consistent(field, default):
-        """Read one shared timestamp metadata field across all rows."""
+        """Read a time setting and check that every row agrees on it."""
         values = {row.metadata[field] for row in rows if field in row.metadata}
         if len(values) > 1:
             raise ValueError("Mixed dataset cutoffs")
@@ -309,7 +309,7 @@ def train(rows, artifact_dir):
     )
 
     def subset(group, cutoff):
-        """Select rows and labels for a named chronological cohort."""
+        """Select examples and their answers for one group of shipments."""
         selected = []
         labels = []
 
@@ -337,7 +337,7 @@ def train(rows, artifact_dir):
     test_rows, test_y = subset("test", observation_cutoff)
 
     def X(selected_rows):
-        """Convert training rows into a pandas feature matrix."""
+        """Put model inputs into a pandas table."""
         return pd.DataFrame(
             [
                 {name: row.features.get(name) for name in FEATURES}
@@ -348,12 +348,12 @@ def train(rows, artifact_dir):
         )
 
     def fit(selected_rows, labels):
-        """Fit the sklearn logistic pipeline or return ``None`` for one class."""
+        """Fit logistic regression, or return ``None`` if all answers are the same."""
         if len(np.unique(labels)) < 2:
             return None
 
-        # Numeric feature values and missingness indicators are both exported
-        # into the portable JSON model artifact after fitting.
+        # Save weights for both the numeric inputs and the missing value flags
+        # in the JSON model after training.
         preprocessing = ColumnTransformer(
             [
                 (
@@ -390,7 +390,7 @@ def train(rows, artifact_dir):
         return model
 
     def measure(labels, probabilities):
-        """Calculate probability and threshold metrics for one evaluation set."""
+        """Measure probability errors and count correct and incorrect alerts."""
         if not len(labels):
             return {
                 "rows": 0,
@@ -475,7 +475,7 @@ def train(rows, artifact_dir):
     }
 
     if not development_rows:
-        # With too little history to split, save a constant and omit held-out metrics.
+        # Too little history for a split: save a constant model and leave test scores empty.
         development_rows = rows
         development_y = np.array([row.label for row in rows])
         test_rows = []

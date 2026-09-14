@@ -1,8 +1,8 @@
-"""Export this project's text-and-table PowerPoint as local HTML slides.
+"""Convert this project's PowerPoint text and tables to browser slides.
 
 Run from the repository root with ``python personal/tools/export_presentation.py``.
-This deliberately supports the shapes used by the interview deck, rather than
-claiming to be a general PowerPoint renderer. Unsupported shapes fail clearly.
+This supports the text boxes and tables in the interview deck. It raises an
+error if the deck contains a shape the converter cannot handle.
 """
 
 from html import escape
@@ -49,7 +49,7 @@ def export(source, destination):
         width, height = int(size.get("cx")), int(size.get("cy"))
 
         def length(value):
-            """Convert EMU lengths to slide-container-relative CSS units."""
+            """Convert EMU lengths to CSS sizes based on the slide dimensions."""
             return f"{float(value) / width * 100:.6f}cqw"
 
         def position(transform):
@@ -62,7 +62,7 @@ def export(source, destination):
             )
 
         def paragraphs(body):
-            """Convert text paragraphs and explicit run styling to escaped HTML."""
+            """Convert slide text and its formatting to HTML, escaping special characters."""
             output = []
             for paragraph in body.findall("a:p", NS):
                 runs = []
@@ -150,6 +150,23 @@ def export(source, destination):
 <nav aria-label="Slide controls"><button id="previous" type="button" aria-label="Previous slide">← Previous</button><label>Slide <select id="slide-picker" aria-label="Choose slide">''' + "".join(f'<option value="{i}">{i} / {len(slides)}</option>' for i in range(1, len(slides) + 1)) + '''</select></label><button id="next" type="button" aria-label="Next slide">Next →</button><button id="toggle-notes" type="button" aria-controls="notes" aria-expanded="false">Speaker notes</button></nav>
 <p id="status" role="status" aria-live="polite">Arrow keys: change slide · F: fullscreen · N: notes</p>
 <aside id="notes" hidden><h2>Speaker notes</h2>''' + "".join(notes) + '''</aside></body></html>'''
+    # Older decks name files from before the personal folder was created.
+    # Update note references on every export so old paths do not return.
+    moved_paths = {
+        "personal/RUNBOOK.md": "personal/README.md",
+        "RUNBOOK.md": "personal/README.md",
+        "personal/IMPROVEMENTS.md": "personal/WALKTHROUGH.md (section 10)",
+        "IMPROVEMENTS.md": "personal/WALKTHROUGH.md (section 10)",
+        "demo/README.md": "personal/README.md",
+        "demo/server.py": "personal/demo/server.py",
+        "tests/test_demo.py": "personal/tests/test_demo.py",
+        "MY_LEARNINGS.md": "personal/MY_LEARNINGS.md",
+        "outputs/notebook_results/": "personal/outputs/notebook_results/",
+        "notebooks/": "personal/notebooks/",
+        "python -m demo.server": "python -m uvicorn personal.demo.api:app --host 127.0.0.1 --port 8765",
+    }
+    for old, new in moved_paths.items():
+        html = re.sub(r"(?<![\w/])" + re.escape(old), lambda match: new, html)
     destination.mkdir(parents=True, exist_ok=True)
     (destination / "presentation.html").write_text(html, encoding="utf-8")
     (destination / "presentation-slides.css").write_text("\n".join(css) + "\n", encoding="utf-8")

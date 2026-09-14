@@ -1,10 +1,9 @@
 """Data preparation and model comparisons used by notebooks 11 onward."""
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
-from statistics import mean
 import json, math, hashlib
 import numpy as np
 import pandas as pd
+from dispatch_risk.features import utc, known_revisions, first_features, window_features
 ROOT = Path(__file__).resolve().parents[3]
 FEATURES = ["latest_temperature_c", "measurement_age_minutes", "arrival_delay_minutes", "temperature_missing", "temperature_count", "temperature_mean_c", "temperature_max_c", "temperature_trend_c_per_hour", "temperature_span_hours"]
 GRACE_HOURS = 48
@@ -12,112 +11,43 @@ LOOKBACK_HOURS = 3
 HORIZON = pd.Timedelta(hours=6)
 
 def save_json(path, value):
+    """Save data as JSON with repeatable key order.
+
+    Args:
+        path: Output file. Its parent folders are created if needed.
+        value: Data to write as JSON.
+
+    Returns:
+        None. Writes the file.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, sort_keys=True, indent=2, allow_nan=False) + "\n")
 
 def load_jsonl(path):
+    """Read the nonblank lines of a JSONL file.
+
+    Args:
+        path: Input file path.
+
+    Returns:
+        A list containing one parsed record per nonblank line.
+    """
     with Path(path).open() as handle:
         return [json.loads(line) for line in handle if line.strip()]
 
-def utc(text):
-    value = datetime.fromisoformat(text.replace("Z", "+00:00"))
-    if value.tzinfo is None:
-        raise ValueError("An explicit timezone is required.")
-    return value.astimezone(timezone.utc)
-
-def known_revisions(records, checkpoint):
-    """Select the highest revision received by the checkpoint for each event ID."""
-    if checkpoint.tzinfo is None:
-        raise ValueError("Checkpoint must include a timezone")
-    checkpoint = checkpoint.astimezone(timezone.utc)
-    delivered = {}
-    latest = {}
-    for event in records:
-        if utc(event["received_at"]) > checkpoint:
-            continue
-        key = (event["event_id"], event["revision"])
-        # Compare canonical timestamps so equivalent timezone notation agrees.
-        normalized = dict(event)
-        for field in ("device_time", "received_at"):
-            normalized[field] = utc(event[field]).isoformat()
-        signature = json.dumps(normalized, sort_keys=True, allow_nan=False)
-        if key in delivered:
-            if delivered[key] != signature:
-                raise ValueError("Conflicting content for the same event/revision")
-            continue
-        delivered[key] = signature
-        prior = latest.get(event["event_id"])
-        if prior is not None and prior["shipment_id"] != event["shipment_id"]:
-            raise ValueError("An event ID changed shipment")
-        if prior is None or event["revision"] > prior["revision"]:
-            latest[event["event_id"]] = dict(event)
-    return [latest[event_id] for event_id in sorted(latest)]
-
-def first_features(records, shipment, checkpoint):
-    selected = known_revisions(records, checkpoint)
-    usable = []
-    for event in selected:
-        if event["shipment_id"] != shipment or event["kind"] != "temperature_c":
-            continue
-        value = event["value"]
-        if isinstance(value, bool) or not isinstance(value, (float, int)):
-            continue
-        if not math.isfinite(value):
-            continue
-        measured = utc(event["device_time"])
-        received = utc(event["received_at"])
-        if measured > received:  # Exclude measurements whose clocks run ahead of receipt.
-            continue
-        usable.append(event)
-    if not usable:
-        return {"latest_temperature_c": None, "measurement_age_minutes": None,
-                "arrival_delay_minutes": None, "temperature_missing": 1}
-    latest = max(usable, key=lambda e: (utc(e["device_time"]),
-                                      utc(e["received_at"]), e["event_id"]))
-    measured = utc(latest["device_time"])
-    received = utc(latest["received_at"])
-    return {
-        "latest_temperature_c": float(latest["value"]),
-        "measurement_age_minutes": (checkpoint - measured).total_seconds() / 60,
-        "arrival_delay_minutes": (received - measured).total_seconds() / 60,
-        "temperature_missing": 0,
-    }
-
-def window_features(records, shipment, checkpoint, window_hours=3):
-    if checkpoint.tzinfo is None:
-        raise ValueError("Checkpoint needs an explicit timezone")
-    if not math.isfinite(window_hours) or window_hours <= 0:
-        raise ValueError("Window must be finite and positive")
-    left = checkpoint - timedelta(hours=window_hours)
-    points = []
-    for event in known_revisions(records, checkpoint):
-        if event["shipment_id"] != shipment or event["kind"] != "temperature_c":
-            continue
-        value = event["value"]
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-            continue
-        measured, received = utc(event["device_time"]), utc(event["received_at"])
-        # Use the same clock rule as the latest-temperature feature.
-        if measured > received or not left < measured <= checkpoint:
-            continue
-        points.append((measured, event["event_id"], float(value)))
-    points.sort(key=lambda p: (p[0], p[1]))
-    if not points:
-        return {"temperature_count": 0, "temperature_mean_c": None,
-                "temperature_max_c": None, "temperature_trend_c_per_hour": None,
-                "temperature_span_hours": None}
-    values = [p[2] for p in points]
-    hours = [(p[0] - points[0][0]).total_seconds() / 3600 for p in points]
-    x_mean, y_mean = mean(hours), mean(values)
-    denominator = sum((x - x_mean)**2 for x in hours)
-    slope = (sum((x - x_mean)*(y - y_mean) for x, y in zip(hours, values))
-             / denominator) if denominator > 0 else None
-    return {"temperature_count": len(points), "temperature_mean_c": y_mean,
-            "temperature_max_c": max(values), "temperature_trend_c_per_hour": slope,
-            "temperature_span_hours": hours[-1]}
 
 def prepare_inputs(data_dir=None):
+    """Build the input table and assign shipments to groups ordered by time.
+
+    Args:
+        data_dir: Raw data folder. Defaults to the repository data folder.
+
+    Returns:
+        The feature table, incident reports, and settings describing the split.
+        Each shipment belongs to one group. The latest checkpoint is the assumed
+        end of observation; it does not prove that reporting is complete.
+    """
     data_dir = Path(data_dir) if data_dir else ROOT / "data"
     events = load_jsonl(data_dir / "events.jsonl")
     reports = pd.DataFrame(load_jsonl(data_dir / "labels.jsonl"), columns=["shipment_id", "incident_at", "label_available_at", "incident_id", "severity"])
@@ -133,7 +63,7 @@ def prepare_inputs(data_dir=None):
     n = len(cohorts)
     val_start = cohorts.iloc[int(n * .6)]["decision_time"]
     test_start = cohorts.iloc[int(n * .8)]["decision_time"]
-    # Conservative snapshot cutoff based on observed checkpoint coverage, not latest positive incident.
+    # Assume observation ends at the latest checkpoint. Report coverage is unconfirmed.
     observation_cutoff = decisions["decision_time"].max()
     assignment = {r.shipment_id: ("train" if r.decision_time < val_start else "validation" if r.decision_time < test_start else "test") for r in cohorts.itertuples()}
     by_ship = {}
@@ -153,6 +83,19 @@ def prepare_inputs(data_dir=None):
     return table, reports, manifest
 
 def mature_labels(table, reports, cutoff, grace_hours=GRACE_HOURS):
+    """Assign answers to examples whose reporting wait has passed.
+
+    Args:
+        table: Prediction checkpoints and input values.
+        reports: Incident records, including arrival times.
+        cutoff: Latest time at which a report can be used.
+        grace_hours: Extra reporting time after the six hour prediction window.
+
+    Returns:
+        A copy of eligible rows with label and label_cutoff columns. A matching
+        incident gives 1. No matching report gives 0 under the completeness
+        assumption. Rows still waiting for reports are left out.
+    """
     cutoff = pd.Timestamp(cutoff)
     eligible = table.loc[table["decision_time"] + HORIZON + pd.Timedelta(hours=grace_hours) <= cutoff].copy()
     known = reports.loc[reports["label_available_at"] <= cutoff]
@@ -167,6 +110,19 @@ def mature_labels(table, reports, cutoff, grace_hours=GRACE_HOURS):
     return eligible
 
 def development_data(data_dir=None):
+    """Prepare the earlier training and model comparison groups.
+
+    Args:
+        data_dir: Raw data folder, or None for the supplied dataset.
+
+    Returns:
+        Training rows, validation rows, the full input table, reports and split
+        settings. Labels use the reporting cutoff for each group.
+
+    Raises:
+        ValueError: If there are too few shipments or either fitting/comparison
+            group lacks both incident and no incident examples.
+    """
     table, reports, manifest = prepare_inputs(data_dir)
     train = mature_labels(table.loc[table.cohort == "train"], reports, manifest["validation_start"])
     validation = mature_labels(table.loc[table.cohort == "validation"], reports, manifest["test_start"])
@@ -176,11 +132,20 @@ def development_data(data_dir=None):
     return train, validation, table, reports, manifest
 
 def imputation_pipeline(scale=False):
+    """Create the steps that fill missing values and optionally scale inputs.
+
+    Args:
+        scale: Whether to subtract training averages and divide by training scales.
+
+    Returns:
+        An unfitted sklearn transformer. It learns medians when fitted and adds
+        one missing value flag for each input.
+    """
     from sklearn.pipeline import Pipeline
     from sklearn.impute import SimpleImputer, MissingIndicator
     from sklearn.compose import ColumnTransformer
     from sklearn.preprocessing import StandardScaler
-    # Indicators for every input ensure missingness remains visible even if absent in training.
+    # Add a missing value flag for every input, including inputs complete in training.
     numeric = [("impute", SimpleImputer(strategy="median", keep_empty_features=True))]
     if scale:
         numeric.append(("scale", StandardScaler()))
@@ -188,6 +153,13 @@ def imputation_pipeline(scale=False):
 
 MODEL_ORDER = ["constant", "logistic_regression", "shallow_tree", "random_forest", "gradient_boosting"]
 def candidate_models():
+    """Create the five models used in the notebook comparison.
+
+    Returns:
+        A dictionary of unfitted sklearn pipelines: constant, logistic regression,
+        small decision tree, random forest and gradient boosting. Each includes
+        the required preparation of inputs.
+    """
     from sklearn.pipeline import Pipeline
     from sklearn.dummy import DummyClassifier
     from sklearn.linear_model import LogisticRegression
@@ -203,6 +175,21 @@ def candidate_models():
     return {name: Pipeline([("prepare", imputation_pipeline(scale=name=="logistic_regression")), ("model", estimator)]) for name,estimator in estimators.items()}
 
 def metrics(y, probability, threshold=0.2):
+    """Compare predicted probabilities with known answers.
+
+    Args:
+        y: Actual answers, each 0 or 1.
+        probability: One predicted probability per answer.
+        threshold: Probability at which we count an alert; defaults to 0.2.
+
+    Returns:
+        Counts, ranking and probability error scores, and alert results. Empty
+        input gives empty metrics. Threshold result names retain the suffix 0_2,
+        so use the default threshold when interpreting those names.
+
+    Raises:
+        ValueError: If probabilities have the wrong shape or invalid values.
+    """
     from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, precision_score, recall_score, confusion_matrix
     y = np.asarray(y,dtype=int); probability = np.asarray(probability,dtype=float)
     if not len(y):
@@ -218,6 +205,16 @@ def metrics(y, probability, threshold=0.2):
             "true_positive":int(tp),"false_positive":int(fp),"true_negative":int(tn),"false_negative":int(fn)}
 
 def validation_run(data_dir=None):
+    """Fit candidate models and compare them on the validation group.
+
+    Args:
+        data_dir: Raw data folder, or None for the supplied dataset.
+
+    Returns:
+        Comparison table, selection details, fitted models, training rows,
+        validation rows, the full input table and incident reports. Selection
+        follows the declared Brier and simplicity rule.
+    """
     from threadpoolctl import threadpool_limits
     train, validation, table, reports, manifest = development_data(data_dir)
     rows=[]; fitted={}
@@ -233,13 +230,22 @@ def validation_run(data_dir=None):
     if eligible.empty:
         winner="constant"
     else:
-        # Predeclared: best probability score with a small simplicity tolerance.
+        # Apply the declared rule: allow a small Brier difference to choose a simpler model.
         near=eligible.loc[eligible.brier <= eligible.brier.min()+0.002]
         winner=min(near.model,key=MODEL_ORDER.index)
     selection={"selected_model":winner,"rule":"Improve validation AP and Brier over constant; choose simplest within 0.002 Brier of best eligible; otherwise constant", "simplicity_order":MODEL_ORDER, "threshold":0.2,"threshold_role":"Fixed teaching comparison only; not a deployment choice", "split":manifest,"validation_results":rows}
     return comparison,selection,fitted,train,validation,table,reports
 
 def test_run():
+    """Fit the chosen family on earlier data and evaluate later shipments.
+
+    Returns:
+        Selection details, the final model, constant baseline, development rows,
+        test rows, model probabilities and baseline probabilities.
+
+    Raises:
+        ValueError: If the final group lacks enough outcomes for the comparison.
+    """
     from threadpoolctl import threadpool_limits
     comparison, selection, _, _, _, table, reports = validation_run()
     policy = selection["split"]
@@ -258,6 +264,3 @@ def test_run():
         p = chosen.predict_proba(test[FEATURES])[:,1]
         base_p = baseline.predict_proba(test[FEATURES])[:,1]
     return selection,chosen,baseline,dev,test,p,base_p
-
-# Later notebooks use the feature functions maintained in the package.
-from dispatch_risk.features import utc, known_revisions, first_features, window_features

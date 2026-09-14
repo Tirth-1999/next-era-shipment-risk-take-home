@@ -26,10 +26,10 @@ MAX_EVENT_BYTES = 16384
 
 
 def canonical(value):
-    """Serialize JSON-compatible data into deterministic bytes.
+    """Convert data to JSON bytes using the same format every time.
 
     Args:
-        value: Data structure made from JSON-compatible primitives.
+        value: Data made from dictionaries, lists, strings, numbers, booleans and None.
 
     Returns:
         UTF-8 JSON bytes with sorted keys and compact separators.
@@ -47,7 +47,7 @@ def canonical(value):
 
 
 def aware(value):
-    """Validate and normalize a datetime to UTC.
+    """Check that a time has a timezone, then convert it to UTC.
 
     Args:
         value: Datetime expected to include timezone information.
@@ -56,7 +56,7 @@ def aware(value):
         The same instant converted to UTC.
 
     Raises:
-        ValueError: If the input is not timezone-aware.
+        ValueError: If the input does not include a timezone.
     """
     if not isinstance(value, datetime) or value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("A timezone-aware datetime is required")
@@ -64,10 +64,10 @@ def aware(value):
 
 
 def identifier(value, field):
-    """Validate a stable identifier used in events and labels.
+    """Check an event or incident ID.
 
     Args:
-        value: Candidate string identifier.
+        value: The ID to check.
         field: Field name used in the validation error.
 
     Returns:
@@ -82,18 +82,18 @@ def identifier(value, field):
 
 
 def normalize_event(event):
-    """Convert a ``TelemetryEvent`` into retained canonical JSON data.
+    """Check a delivered event and copy it into a dictionary for storage.
 
     Args:
         event: Raw telemetry event supplied by callers, tests, or replay.
 
     Returns:
-        A plain dictionary with UTC ISO timestamps and copied payload data.
+        A dictionary with times written in UTC and a separate copy of the extra data.
 
     Raises:
         TypeError: If ``event`` is not a ``TelemetryEvent``.
         ValueError: If identifiers, revision, timestamps, value, payload, or
-            encoded size violate the online retention contract.
+            stored size break the input rules.
     """
     if not isinstance(event, TelemetryEvent):
         raise TypeError("Expected TelemetryEvent")
@@ -125,8 +125,8 @@ def normalize_event(event):
     if len(encoded) > MAX_EVENT_BYTES:
         raise ValueError("Event exceeds 16 KiB retention budget")
 
-    # Round-trip through canonical JSON so nested caller-owned payloads cannot
-    # mutate the retained engine state later.
+    # Copy nested data through JSON. Changes made by the caller afterward
+    # must not change the history stored by this engine.
     return json.loads(encoded)
 
 
@@ -138,7 +138,7 @@ def event_from_mapping(row):
             fields may be ISO strings.
 
     Returns:
-        A ``TelemetryEvent`` with parsed UTC-aware datetimes.
+        A ``TelemetryEvent`` with parsed times that include the UTC timezone.
     """
     return TelemetryEvent(
         **{
@@ -156,7 +156,7 @@ def utc(text):
         text: ISO-8601 timestamp. A trailing ``Z`` is accepted.
 
     Returns:
-        Timezone-aware UTC datetime.
+        A datetime that includes the UTC timezone.
 
     Raises:
         ValueError: If the timestamp has no explicit timezone.
@@ -171,14 +171,14 @@ def known_revisions(records, checkpoint):
     """Select the latest known revision for each event at a decision time.
 
     Args:
-        records: Retained normalized event dictionaries.
+        records: Checked event dictionaries still stored in memory.
         checkpoint: Decision time. Events received after this time are ignored,
             even if their device time is older.
 
     Returns:
         One dictionary per event ID, using the highest revision that had
         arrived by ``checkpoint``. Results are sorted by event ID for stable
-        downstream hashing.
+        calculation of the data fingerprint.
 
     Raises:
         ValueError: If the checkpoint has no timezone, duplicate deliveries
@@ -193,7 +193,7 @@ def known_revisions(records, checkpoint):
         if utc(event["received_at"]) > checkpoint:
             continue
         key = (event["event_id"], event["revision"])
-        # Compare canonical timestamps so equivalent timezone notation agrees.
+        # Convert both times to UTC so different timezone formats compare equally.
         normalized = dict(event)
         for field in ("device_time", "received_at"):
             normalized[field] = utc(event[field]).isoformat()
@@ -212,10 +212,10 @@ def known_revisions(records, checkpoint):
 
 
 def first_features(records, shipment, checkpoint):
-    """Extract latest-temperature freshness features for one shipment.
+    """Find the latest usable temperature and calculate its age and arrival delay.
 
     Args:
-        records: Normalized events retained for the shipment history.
+        records: Checked event dictionaries stored for the shipment.
         shipment: Shipment ID being scored.
         checkpoint: Decision time used to decide which revisions are known.
 
@@ -266,22 +266,22 @@ def first_features(records, shipment, checkpoint):
 
 
 def window_features(records, shipment, checkpoint, window_hours=3):
-    """Summarize recent temperature behavior inside a lookback window.
+    """Summarize temperatures from the past few hours.
 
     Args:
-        records: Normalized retained events.
+        records: Checked event dictionaries still in memory.
         shipment: Shipment ID being scored.
-        checkpoint: Right edge of the lookback window.
+        checkpoint: Time at which we are making the prediction.
         window_hours: Positive number of hours to look backward.
 
     Returns:
         Count, mean, max, linear trend, and span of usable temperature readings
         whose measurement time falls in ``(checkpoint - window, checkpoint]``.
         Trend is ``None`` when fewer than two distinct measurement times are
-        available, because the slope is unknown rather than flat.
+        available, because we do not know how the temperature changed.
 
     Raises:
-        ValueError: If the checkpoint is naive or the window is invalid.
+        ValueError: If the checkpoint has no timezone or the window is invalid.
     """
     if checkpoint.tzinfo is None:
         raise ValueError("Checkpoint needs an explicit timezone")
@@ -340,17 +340,17 @@ def window_features(records, shipment, checkpoint, window_hours=3):
 
 
 def extract_features(records, shipment, checkpoint):
-    """Create the full model feature vector for a shipment checkpoint.
+    """Calculate all model inputs for one shipment at the requested time.
 
     Args:
-        records: Iterable of normalized events available to the caller.
+        records: Checked event dictionaries available to the caller.
         shipment: Shipment ID to score.
         checkpoint: Decision time. Only revisions received by this instant may
             contribute to the features.
 
     Returns:
-        Dictionary ordered by ``FEATURES`` containing the exact training and
-        serving feature contract.
+        A dictionary with the names in ``FEATURES``, in that order. Training
+        and live predictions use these same calculations.
     """
     checkpoint = aware(checkpoint)
     records = list(records)

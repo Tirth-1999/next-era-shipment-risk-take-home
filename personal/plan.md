@@ -1,156 +1,58 @@
-# Shipment risk: work plan
+# My shipment risk project plan
 
-## Where the project stands
+## My goal
 
-The fourteen notebooks and the Python engine are complete. The engine builds training rows, fits the selected model, scores incoming telemetry, limits retained history, saves and restores snapshots, and reloads models without clearing shipment state.
+I want to explain and demonstrate a system that predicts the chance of a shipment incident in the next six hours. I need to show which information was available at each prediction time, how I turned it into model inputs, and how I checked the predictions later.
 
-The last implementation check passed 20 tests. Two replays produced identical predictions and snapshots. A separate stream with 12,881 deliveries stayed within a 32-shipment limit. The held-out model results were AP 0.981277 and Brier 0.003760, based on 309 examples and 25 incidents. Those figures describe synthetic data under an assumed reporting-completeness policy; they are not a deployment claim.
+My implementation, fourteen notebooks and local demo are complete. My current focus is interview practice and understanding the limits of the solution. The latest checks passed 27 tests and all 14 notebooks. The saved evaluation has 309 checkpoints and 25 positives, with average precision 0.981277 and Brier score 0.003760. These results come from synthetic data.
 
-The optional local interview demo is now implemented in `personal/demo/`. Run it using the instructions in `personal/README.md`, then use the walkthrough to review the finished code and practise explaining a change to one requirement.
+## How I worked through the project
 
-## What we are trying to build
+| Stage | What I worked on | What I took into the next stage |
+| --- | --- | --- |
+| Notebooks 1–2 | Read the data and followed duplicates and corrections | I must select the version available at the checkpoint |
+| Notebooks 3–4 | Compared the two clocks and calculated temperature features | Reading age, arrival delay and recent trend answer different questions |
+| Notebook 5 | Converted JSON into tables | I can inspect the data while preserving delivery order |
+| Notebooks 6–7 | Studied incident reports and reporting delays | An absent report can mean the outcome is still unknown |
+| Notebooks 8–9 | Built examples and measured a constant baseline | I need a clear target and a simple comparison |
+| Notebook 10 | Studied how logistic regression learns | Weights and the starting score change during fitting |
+| Notebooks 11–12 | Split shipments by time and compared models | I choose the model on validation data |
+| Notebooks 13–14 | Evaluated the chosen model and checked saved files | I can load the model in a separate process and repeat predictions |
+| Python package | Added shared features, memory limits, recovery and reload | I can test the required engine behavior |
+| Demo and CLI practice | Built examples for explaining and exercising the engine | I can show evidence for each claim during the interview |
 
-For one shipment at one decision time, estimate the chance of a temperature incident in the following six hours. Use only telemetry available by that decision time. Later incident reports can provide training labels, but cannot become prediction inputs.
+The detailed history stays in [my learning journal](MY_LEARNINGS.md). I use this plan for my current priorities.
 
-[README.md](../README.md) is the original assignment. [DECISIONS.md](../DECISIONS.md) records the implemented choices and their limits. [run instructions](README.md#cli-replay-and-recovery) has commands to run the solution. [personal/MY_LEARNINGS.md](MY_LEARNINGS.md) follows the experiments and discussions in order.
+## The decisions I need to explain
 
-## How to work through the remaining concepts
+I use information received by the prediction time. I keep earlier revisions while their history is stored. I identify duplicates by event ID and revision.
 
-Start with one shipment and a concrete question. Explain the idea before introducing terminology, show the relevant readings or code, and check the result. Discuss alternatives where they change behavior, such as how much history to retain or when to trust a negative label.
+I use a three hour temperature window and a six hour incident window. I allow another 48 hours for reports before using a training example. That wait assumes older reports are complete; it is not proof of completeness.
 
-Keep a separate notebook for each learning checkpoint. Inspect its outputs before moving to the next experiment. The source modules now contain the maintained feature and engine code; a future experiment should reuse them where possible. Do not select another model using the final test results.
+I split shipments into groups ordered by time. I fit input preparation on fitting rows and choose the model on validation results. Logistic regression met the declared selection rule. The final test does not select another model.
 
-After a checkpoint, add the result, reason for the choice, remaining limitation, and next question to the learning journal. Record actual explanations from the discussion separately from material that still needs review. Running code does not establish understanding by itself.
+I limit stored shipment histories and records. When history is removed, I explain the missing coverage in the prediction. I save history consistently and keep it during model reload. If reload fails, the current model stays active.
 
-## Writing conventions
+My full responses to the customer suggestions are in [DECISIONS.md](../DECISIONS.md).
 
-Use the plain-language rules from the resume memory: lead with the point, describe concrete actions, vary sentence length, and remove filler. Keep technical terms when they explain the decision. Write notebook explanations and comments in English. Comments should explain a rule or an unexpected case, rather than narrate every line.
+## My remaining work
 
-Keep numerical results, uncertainty, and the distinction between experiments and deployed systems intact. Interview notes should sound natural when spoken aloud. Avoid generic praise, tool lists without context, repeated warnings, and notes about the writing process in technical explanations.
+1. I will rehearse the opening and follow one message through the code using [my walkthrough](WALKTHROUGH.md).
+2. I will run the five CLI exercises: a new stream, a failed rule, a changed requirement, evaluation questions, and a small code edit.
+3. I will practise explaining the failed test before describing the fix. I will compare saved replay outputs after the change.
+4. I will review the label contract gap. My builder leaves out checkpoints still waiting for reports, while the assignment asks for a binary label at every checkpoint. I must state this clearly.
+5. I will explain the remaining deployment work: confirmed report coverage, real data evaluation, measured resource use and an alert cutoff based on operating costs.
 
-The reference is `career_records/applications/resume_automation/RESUME_MEMORY.md` in the portfolio project, especially its “Humanized Writing Rules” section. Its resume formatting and bullet-length rules do not apply to this repository.
+I do not need to add model complexity or more demo controls to complete this rehearsal. If the interviewer changes a requirement, I will clarify the expected result, edit the responsible code and test that change.
 
-## Checkpoints completed
+## How I want my notes to read
 
-| Notebook | Question | Result used in the next step |
-|---|---|---|
-| 01: Learning lab | What does one training example represent? | One shipment at a decision time; distinguish events, features and outcomes. |
-| 02: Duplicates and revisions | Which reading was available then? | Select the highest available revision and collapse duplicates. |
-| 03: Clocks and first features | How old is the reading, and when did it arrive? | Separate temperature, measurement age, arrival delay and missingness. |
-| 04: Windows and trends | What happened over the recent past? | Three-hour summaries; slope uses elapsed time and can be missing. |
-| 05: Tables | How can the raw files be inspected more easily? | Save separate tables in `personal/data/tables/`, preserving delivery order and original JSON. |
-| 06: Outcome availability | Does no report mean no incident? | Report delay leaves some outcomes unknown. |
-| 07: Maturity | When can a row enter training? | Use a 48-hour reporting allowance after the six-hour window; inspect 72/96-hour alternatives. |
-| 08: Training table | How do features and labels fit together? | Nine feature columns, separate labels and audit metadata. |
-| 09: Baseline | What must a useful model improve on? | Compare with the training incident rate; accuracy alone can hide zero recall. |
-| 10: Model mechanics | What changes during training? | Logistic weights and intercept; a conceptual comparison with trees. |
-| 11: Evaluation setup | How do we estimate future performance? | Chronological shipment groups and preprocessing fitted on training data. |
-| 12: Model comparison | Which candidate meets the declared rule? | Logistic regression selected from five validation candidates. |
-| 13: Final evaluation | How does the selected model perform on held-out data? | Model/baseline metrics, operational slices, reliability bins and uncertainty. |
-| 14: Saved model | Can another process reproduce the predictions? | Model loading and input checks before implementing the stateful engine. |
+I use plain English, short explanations and concrete examples. I keep technical names when they help me find the code, then explain what they mean. I want to understand an answer well enough to say it in my own words.
 
-Checkpoint 15 moved the tested behavior into Python and added memory limits, snapshots, concurrency, reload and a CLI. Checkpoint 16 reviews wording and plans an optional demonstration. Earlier journal entries describe what was known at that stage, not the current completion status.
+I record what was tested and what remains uncertain. I keep results from real work separate from rehearsal examples. After each checkpoint, I add what I tried, what happened, why I chose the approach and what I still need to understand to my learning journal.
 
-## Choices to explain in the interview
+## Where I start each practice session
 
-- **Two clocks:** receipt determines what was knowable; device time describes when a measurement claims to have happened.
-- **Outcome labels:** the six-hour horizon and 48-hour allowance apply to both classes. Mature negatives are assumed complete, not certified by the dataset.
-- **Model choice:** logistic regression met the validation rule. Higher AP alone did not make boosting the selected model.
-- **Memory:** cap shipments and records per shipment. Removing history limits historical reconstruction, so predictions report incomplete coverage.
-- **Reload:** validate a new model before swapping it. A failed reload retains the old model and all telemetry.
-- **Replay:** retain the same delivery order, state rules, feature version and model to reproduce serialized results.
+I use [personal/README.md](README.md) for setup and commands. I select the repository's `.venv/bin/python` kernel for notebooks. I run the notebook checker when I change notebook paths or shared helpers.
 
-## Assignment constraints
-
-The README specifies Python 3.11+, offline evaluation, declared dependencies, concurrent calls, and streams exceeding 10,000 events with capacity 32. Compressed generated data must be below 5 MB; the current data files total about 0.40 MB when individually gzip-compressed.
-
-It also states a seven-hour maximum and says: “Do not spend time on UI, infrastructure-as-code, or presentation slides.” This is stronger than saying UI receives no points. No claim is made that the full learning process stayed within that timebox. The optional demo below is for separate interview preparation and should stay outside the assessed submission unless the interviewer invites it.
-
-## Optional interview UI: implemented walkthrough
-
-**Purpose:** make one prediction easy to explain. The demo should show which readings the engine used, why other readings were excluded, and what changes when another delivery arrives. It should help tell a five-minute story without adding a second implementation of the model.
-
-**Status:** implemented after approval to build. It uses Python’s standard library, the existing engine and local HTML/CSS/JavaScript. No new dependencies were added. The design below records the agreed scope; `personal/README.md` describes the working controls.
-
-### First version: one local page
-
-Use a small Python launcher and a browser page that runs locally. Reuse `RiskEngine`, the shared feature functions, and the saved model. Keep it in a separate `personal/demo/` folder with no imports from the core package back into the demo. Start with the existing data and a few small examples whose answers can be checked by hand.
-
-The page would have three sections:
-
-1. **Shipment and delivery controls.** Choose a shipment, inspect the next delivery, step forward, or reset. Show UTC throughout. Keep “delivery position” separate from “score as of”: they answer different questions.
-2. **What was known.** Show a table of event IDs, revisions, device times, receipt times and temperatures. Mark duplicates, revisions unavailable at the checkpoint, superseded readings and excluded device clocks. Include a simple temperature timeline with the three-hour lookback shaded.
-3. **Prediction and retained state.** Show six-hour incident probability, model version, feature values and degraded reasons. Explain a missing trend as insufficient distinct measurement times. Show retained shipments/records and eviction counts alongside their limits.
-
-A later incident report can appear in a separate “Outcome, revealed later” section. It must not enter the feature panel or imply that the prediction knew the answer.
-
-### Walkthrough to support
-
-Begin with the 8°C reading received at 9:05 AM. Score at 11 AM. Deliver its noon correction to 5°C and score at 11 AM again: the result should stay the same while history is retained. Then score at noon and show the eligible revision changing.
-
-Next, use a small shipment cap to show eviction and its degraded reason. Save a snapshot, restore it, and compare the serialized prediction. Finally, try an invalid model reload and show that the previous model still serves. A valid reload example needs a separately identified valid artifact; it should not suggest that a demonstration model has better performance.
-
-### Evaluation view, if the first version is useful
-
-Read the existing evaluation report to show the selected model beside the constant baseline, with row/incident counts, AP, Brier and precision/recall at the illustrative 20% threshold. Include the source and freshness slices. Explain that the dataset is synthetic and the threshold is not an operating recommendation. Do not retrain or tune from the UI.
-
-### How to check the demo
-
-For each displayed prediction, compare its probability, model version and feature digest with a direct engine call. Check the delayed-correction example, duplicate handling, eviction, restore and failed reload. Reset must recreate the same starting state and delivery sequence. Empty data and missing artifacts need readable errors rather than a blank page or a zero-risk result.
-
-Keep the command-line walkthrough as the fallback. The UI should be removable without changing package installation, tests, training or scoring. No hosting, login, branding work or slide deck is needed for this proposal.
-
-### Next review
-
-Start the local demo and follow the late-correction example. Delivery playback, the prediction and feature panels, memory counters, snapshot/restore, reload checks and the saved evaluation view are implemented. The next task is to practise the explanation and compare it with the notebook and CLI walkthroughs.
-
-## Checkpoint 17: local UI
-
-Built the optional demo with separate playback sessions per tab. Every displayed feature set is checked against the engine’s feature digest. Automated tests cover duplicates, late corrections, eviction, restore, reload, source-data playback and tab isolation. Browser checks cover the controls and saved evaluation view. The engine code and model artifact are unchanged.
-
-## Checkpoint 19: repository handoff documentation
-
-### Browser presentation
-
-The existing nine-slide PowerPoint is also available as HTML at `/presentation` on the demo server. A standard-library exporter preserves the deck's text, tables and notes; the viewer adds keyboard navigation, fullscreen, slide links and a return to the live demo. Re-export after changing the PowerPoint. The presentation remains optional interview preparation and does not change model or engine behavior.
-
-Added main README navigation, environment setup, server startup, retraining and replay commands, saved evaluation metrics, operational slices, and a requirement-to-evidence map. Keep the original assignment available below the submission guide. The handoff must make the immature-row contract difference and synthetic-data limits visible alongside the results. Updated the GitHub About description with the project scope. Next: rehearse the runbook against a new stream and explain the documented tradeoffs.
-
-## Checkpoint 18: improvement review and presentation
-
-Reviewed the implementation against the README and recorded priorities in personal/WALKTHROUGH.md (Improvement priorities). The main submission concern is the documented omission of immature training rows from a contract that requests every checkpoint. Further priorities are explicit observation coverage, measured memory/latency, bounded snapshot parsing, minimum-version testing and validation on real data. No model or engine policy was changed during this review.
-
-Created a nine-slide interview presentation in the UI’s green-and-cream theme, with editable evidence tables and speaker notes. It covers timing, features, labels, model selection, evaluation, engine behavior, remaining work and the live walkthrough. It is optional interview preparation alongside the demo. Next: review the contract concern, then rehearse the presentation and demonstration.
-
-
-## Checkpoint 20: a simpler demo
-
-The default view now explains one shipment in four steps: original reading, duplicate, late correction, and a noon prediction. Each step uses the real engine and includes a sentence to say aloud. Guided playback has its own session so it does not reset manual exploration. Technical controls and exact evaluation metrics remain available on demand. The sidebar can be collapsed and remembers its setting for the tab. Small positive probabilities are shown as less than 0.1% rather than rounded to zero.
-
-The exploration tab now opens with only the usable temperature, estimated risk, and next/reset buttons. Model results open with caught, missed, and false-alarm counts. Explanations and full diagnostic controls are collapsed to keep the initial view short.
-
-Replaced the manual playback dashboard with System checks. Each click demonstrates a specific guarantee using a small live example: bounded shipment count, exact snapshot recovery, and continued scoring after a rejected model reload. Full-stream replay remains a CLI task in personal/README.md.
-
-Navigation now has three distinct demo purposes: prediction timing, system reliability, and model evaluation. Removed the separate speaking-notes tab because the guided walkthrough already provides those prompts. The footer stays at the bottom of short pages and follows content on longer pages.
-
-## Checkpoint 21: interview API
-
-Added optional FastAPI stream generation, two-replay checks, persisted evidence and a fixed pytest endpoint. New-stream data is separate from the original evaluation. The UI supports a capacity change; source edits remain local and require an API restart before replay. Actual failures produce evidence, rather than simulated failures being presented as discovered bugs.
-
-The first three demo pages now emphasize visible state: eligible reading cards, memory/recovery status, and an interactive model-versus-baseline incident display. Supporting explanations stay collapsed. The new-stream API remains available separately for interview exercises.
-
-## Checkpoint 22: repository organization and interview walkthrough
-
-Grouped personal learning and presentation materials under `personal/`. The root keeps the required implementation, tests, raw data, final model, decisions and runbook. Use `WALKTHROUGH.md` to rehearse the code in execution order and prepare for the five live follow-up tasks. Updated notebook paths, demo imports and commands; all 28 core and optional tests pass, and notebook code cells compile.
-
-The added runbook also belongs to personal preparation and now lives at `personal/README.md`. Essential setup, training, testing and replay commands remain in the root README.
-
-## Checkpoint 23: remove repository clutter
-
-Removed generated Python caches and installation metadata from Git tracking; these are recreated locally. Consolidated improvement priorities into the walkthrough and made FastAPI the single documented full-demo startup. Retained notebooks, exported tables and saved experiment results because they preserve the learning and reproducibility record.
-
-Documentation consolidation: combined the runbook and demo guide into `personal/README.md`. Use it for commands and `WALKTHROUGH.md` for rehearsal; this journal and the plan retain development history.
-
-## Checkpoint 24: verify notebooks after relocation
-
-Audited paths after the move to `personal/`. Notebooks 11–14 now add repository `src/` explicitly before importing shared helpers. A kernel's display label does not establish its Python executable; use the project `.venv` interpreter. Added a temporary-copy checker that executes every notebook in a fresh kernel, including training and fresh-process artifact checks. All 14 notebooks and 28 core/demo tests passed. Saved submission artifacts were not regenerated.
+I use [walkthrough section 7](WALKTHROUGH.md#7-cli-rehearsal-for-the-five-follow-up-tasks) for terminal practice. I save new inputs and replay evidence in a separate folder so I keep the original model and evaluation intact.

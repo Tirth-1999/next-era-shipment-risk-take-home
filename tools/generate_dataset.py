@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a deterministic dataset containing realistic temporal hazards."""
+"""Create repeatable sample data with late, repeated and corrected messages."""
 
 from __future__ import annotations
 
@@ -12,6 +12,15 @@ from pathlib import Path
 
 
 def emit(path: Path, rows: list[dict]) -> None:
+    """Save dictionaries as one JSON record per line.
+
+    Args:
+        path: File to write. Missing parent folders are created.
+        rows: Records to save in the supplied order.
+
+    Returns:
+        None. Replaces the file contents.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         for row in rows:
@@ -19,10 +28,29 @@ def emit(path: Path, rows: list[dict]) -> None:
 
 
 def iso(value: datetime) -> str:
+    """Write a time as text, using Z for UTC.
+
+    Args:
+        value: Datetime to format.
+
+    Returns:
+        Its ISO timestamp string, with +00:00 replaced by Z.
+    """
     return value.isoformat().replace("+00:00", "Z")
 
 
 def generate(seed: int, shipments: int) -> tuple[list[dict], list[dict], list[dict]]:
+    """Create sample readings, incident reports and prediction checkpoints.
+
+    Args:
+        seed: Number that makes a generated dataset repeatable.
+        shipments: Number of shipments to create.
+
+    Returns:
+        Three lists: event messages, incident reports and decision times.
+        Messages include duplicates, late corrections and incorrect device times.
+        The same seed and shipment count produce the same lists in this runtime.
+    """
     rng = random.Random(seed)
     origin = datetime(2026, 1, 1, tzinfo=timezone.utc)
     events: list[dict] = []
@@ -110,6 +138,14 @@ def generate(seed: int, shipments: int) -> tuple[list[dict], list[dict], list[di
 
 
 def main() -> None:
+    """Read command options and write the sample dataset.
+
+    Inputs:
+        Terminal options --seed, --shipments and --output.
+
+    Returns:
+        None. Saves three JSONL files and MANIFEST.json, then prints their counts.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=1729)
     parser.add_argument("--shipments", type=int, default=600)

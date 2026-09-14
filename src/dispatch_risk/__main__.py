@@ -1,4 +1,4 @@
-"""Offline training and delivery-order replay entry point."""
+"""Commands to train a model or process saved messages in their original order."""
 import argparse
 import json
 from pathlib import Path
@@ -8,7 +8,7 @@ from .features import event_from_mapping, utc
 
 
 def jsonl(path):
-    """Yield nonblank JSON objects from a JSON Lines file.
+    """Read one JSON record at a time, skipping blank lines.
 
     Args:
         path: File path to read.
@@ -23,12 +23,11 @@ def jsonl(path):
 
 
 def main():
-    """Run the package command-line interface.
+    """Run the train or replay command from the terminal.
 
-    The ``train`` command builds point-in-time training rows from the data
-    folder and writes a model artifact. The ``replay`` command feeds events to
-    the online engine in delivery order, writes canonical predictions, and
-    saves a restorable snapshot.
+    The ``train`` command builds examples using information known at each
+    checkpoint and saves a model. The ``replay`` command processes messages
+    in file order, saves predictions, and saves history that can be restored.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["train", "replay"])

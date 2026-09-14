@@ -22,7 +22,7 @@ run_lock = Lock()
 
 
 class StreamRequest(BaseModel):
-    """Reproducible stream seed, size, and engine shipment capacity."""
+    """Settings for the sample data seed, shipment count and memory limit."""
     seed: int = Field(default=1927, ge=0, le=2147483647)
     shipments: int = Field(default=80, ge=3, le=700)
     max_shipments: int = Field(default=32, ge=1, le=128)
@@ -30,7 +30,7 @@ class StreamRequest(BaseModel):
 
 @app.middleware("http")
 async def local_requests(request: Request, call_next):
-    """Reject cross-origin writes and prevent caching of local results."""
+    """Reject requests from another website that would change state and prevent caching of local results."""
     if request.method == "POST":
         origin = request.headers.get("origin")
         if origin and origin != str(request.base_url).rstrip("/"):
@@ -52,7 +52,7 @@ def state(x_demo_session: str | None = Header(default=None)):
 
 @app.post('/api/action')
 def action(body: dict, x_demo_session: str | None = Header(default=None)):
-    """Apply a small demo action through the existing engine adapter."""
+    """Apply a small demo action through the existing demo functions."""
     try:
         return sessions.get(x_demo_session).act(body)
     except (ValueError, RuntimeError, KeyError) as error:
@@ -61,12 +61,12 @@ def action(body: dict, x_demo_session: str | None = Header(default=None)):
 
 @app.get('/api/evaluation')
 def evaluation():
-    """Return the saved held-out evaluation; do not retrain on new streams."""
+    """Return the saved final test results; do not retrain on new streams."""
     return json.loads((ROOT / 'outputs/final_model/evaluation.json').read_text())
 
 
 def replay(events, directory, capacity):
-    """Replay delivery order, writing predictions and snapshot with invariant evidence.
+    """Replay delivery order, writing predictions and snapshot with saved checks of the engine rules.
 
     Args:
         events: Generated telemetry mappings in delivery order.
@@ -74,7 +74,7 @@ def replay(events, directory, capacity):
         capacity: Maximum retained shipments.
 
     Returns:
-        Prediction digest, snapshot digest, counters, and first capacity failure.
+        Fingerprints of the predictions and saved history, counters, and first capacity failure.
     """
     directory.mkdir(parents=True)
     engine = RiskEngine(ROOT / 'outputs/final_model', capacity)
@@ -101,8 +101,8 @@ def replay(events, directory, capacity):
 def new_stream(body: StreamRequest):
     """Generate new data and compare two independent replays of the fixed model.
 
-    Saved outputs include seed, source code digests, raw records, predictions,
-    snapshots and checks. This is software verification, not fresh model evaluation.
+    Saved outputs include seed, source code fingerprints, raw records, predictions,
+    snapshots and checks. These checks test repeatability. They do not measure accuracy on new outcomes.
     """
     if not run_lock.acquire(blocking=False):
         raise HTTPException(409, 'Another verification is running.')
@@ -134,7 +134,7 @@ def new_stream(body: StreamRequest):
 def run_tests():
     """Run the fixed repository test suite in a fresh process after a code edit.
 
-    No caller-supplied command is executed. Return actual exit code and test output.
+    The command is fixed in this function. Return its exit code and test output.
     """
     if not run_lock.acquire(blocking=False):
         raise HTTPException(409, 'Another verification is running.')
@@ -151,7 +151,7 @@ def run_tests():
 
 @app.get('/{path:path}', include_in_schema=False)
 def page(path: str):
-    """Serve only the explicitly allowed demo assets."""
+    """Serve only the demo files listed in the allowed paths."""
     name = {'': 'index.html', 'presentation': 'presentation.html', 'presentation/': 'presentation.html'}.get(path, path)
     allowed = {'index.html', 'app.js', 'style.css', 'presentation.html', 'presentation.js', 'presentation.css', 'presentation-slides.css'}
     if name not in allowed:

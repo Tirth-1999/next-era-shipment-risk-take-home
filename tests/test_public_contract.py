@@ -20,9 +20,3 @@ def test_prediction_wire_format_is_canonical() -> None:
         b'"feature_digest":"abc","model_version":"m-1","probability":0.25,'
         b'"reasons":["temperature_high"],"shipment_id":"s-1"}'
     )
-
-
-def test_add_your_invariant_tests_here() -> None:
-    # Engine and training behavior are covered in the neighboring test modules.
-    assert True
-

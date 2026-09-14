@@ -7,14 +7,14 @@ from typing import Any, Mapping
 
 @dataclass(frozen=True, slots=True)
 class TelemetryEvent:
-    """One delivered shipment event before it is normalized by the engine.
+    """One shipment message before the engine checks and stores it.
 
     Attributes:
-        event_id: Stable identity for a real-world measurement or status update.
+        event_id: ID for one measurement or status update.
             Multiple deliveries with the same event ID may appear when a message
             is duplicated or corrected.
-        revision: Monotonic revision for the same event ID. Higher revisions
-            supersede lower revisions once they have actually arrived.
+        revision: Version number for the same event ID. A higher version replaces
+            a lower one for predictions made after the higher version arrived.
         shipment_id: Shipment that owns this event. The same event ID is not
             allowed to move between shipments.
         device_time: Time when the measurement was taken by the device.
@@ -22,8 +22,8 @@ class TelemetryEvent:
         kind: Type of event. The current feature set uses numeric
             ``temperature_c`` events.
         value: Raw event value. Temperature values must be finite numbers.
-        source: Producer or feed name used for audit slices.
-        payload: Extra JSON-compatible fields retained for traceability.
+        source: Name of the source, used to compare results across data feeds.
+        payload: Extra JSON fields saved so we can inspect the original message.
     """
 
     event_id: str
@@ -39,17 +39,17 @@ class TelemetryEvent:
 
 @dataclass(frozen=True, slots=True)
 class TrainingRow:
-    """Point-in-time supervised example used by offline training.
+    """One training example with the inputs known at its prediction time.
 
     Attributes:
         shipment_id: Shipment being scored.
         decision_time: Prediction checkpoint. Features must only use events
             received at or before this time.
-        features: Model-ready values extracted from the known shipment state.
-        label: Binary target, where 1 means an incident occurred inside the
-            configured prediction horizon.
-        metadata: Audit information about the horizon, split boundaries,
-            source feed, and label-completeness assumption.
+        features: Input values calculated from the shipment information known then.
+        label: Answer used to train the model: 1 means an incident occurred in
+            the prediction window; 0 means no incident under the reporting rule.
+        metadata: Details about the prediction window, data split, source feed,
+            and the assumption about when incident reports are complete.
     """
 
     shipment_id: str
@@ -61,17 +61,17 @@ class TrainingRow:
 
 @dataclass(frozen=True, slots=True)
 class Prediction:
-    """Canonical prediction returned by the online risk engine.
+    """The result returned when the engine predicts shipment risk.
 
     Attributes:
         shipment_id: Shipment that was scored.
         as_of: Decision time used for feature extraction.
-        probability: Incident probability in the six-hour prediction horizon.
-        model_version: Content hash of the portable model artifact.
-        feature_digest: Hash of the exact features used for the score.
+        probability: Estimated chance of an incident in the next six hours.
+        model_version: Fingerprint of the saved model settings.
+        feature_digest: Fingerprint of the exact input values used for this prediction.
         degraded: True when the score is still returned but should be treated
-            with extra caution because of missing, stale, or truncated context.
-        reasons: Stable machine-readable reasons for degraded scoring.
+            with extra caution because of missing readings, old readings, or history removed to save memory.
+        reasons: Reason codes that explain why the prediction has limited information.
     """
 
     shipment_id: str
@@ -83,12 +83,11 @@ class Prediction:
     reasons: tuple[str, ...]
 
     def to_wire(self) -> bytes:
-        """Return deterministic JSON bytes for audit and replay checks.
+        """Write the prediction as JSON bytes in a repeatable format.
 
         Returns:
-            UTF-8 encoded JSON with sorted keys and no non-deterministic
-            whitespace. Replaying the same retained state should produce
-            identical bytes, which makes equality checks meaningful.
+            UTF-8 JSON bytes with sorted keys and fixed spacing. The same
+            prediction produces the same bytes, so tests can compare them exactly.
         """
         import json
 

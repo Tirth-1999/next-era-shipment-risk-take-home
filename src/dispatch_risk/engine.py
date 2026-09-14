@@ -1,4 +1,4 @@
-"""Retain bounded shipment history and score it safely across threads."""
+"""Keep shipment history within limits and protect it when calls overlap."""
 from __future__ import annotations
 
 from collections import OrderedDict
@@ -27,22 +27,20 @@ MAX_RECORDS_PER_SHIPMENT = 128
 
 
 class RiskEngine:
-    """Thread-safe online scorer for retained shipment telemetry.
+    """Store shipment updates and predict risk using the information known then.
 
-    The engine stores a bounded set of normalized events, reconstructs the
-    point-in-time shipment state for each score call, and delegates probability
-    calculation to a portable model artifact. It is designed so duplicate
-    deliveries, late corrections, snapshot/restore, and failed model reloads
-    have predictable behavior that can be tested and explained.
+    The engine limits how much history it keeps. A lock stops overlapping calls
+    from changing that history while another call reads it. Repeated messages,
+    late corrections, recovery and model changes follow explicit rules.
     """
 
     def __init__(self, artifact_dir: Path, max_shipments: int = 10_000):
-        """Create an engine with a loaded model and empty retained state.
+        """Load a model and start with no shipment history.
 
         Args:
             artifact_dir: Directory containing ``model.json``.
             max_shipments: Maximum number of shipment histories retained in
-                memory before least-recently-used eviction starts.
+                memory. When full, remove the shipment updated longest ago.
 
         Raises:
             ValueError: If ``max_shipments`` is not a positive integer or the
@@ -58,19 +56,19 @@ class RiskEngine:
         self._accepted = self._evictions = self._trimmed = 0
 
     def ingest(self, event: TelemetryEvent) -> bool:
-        """Ingest one event delivery into bounded shipment history.
+        """Check one incoming message and update the stored shipment history.
 
         Args:
-            event: Raw telemetry event received from the delivery stream.
+            event: The shipment message that just arrived.
 
         Returns:
-            ``True`` when the event created new retained state. ``False`` when
+            ``True`` when the message added information to the stored history. ``False`` when
             the delivery was an exact duplicate or older than already discarded
             history.
 
         Raises:
             ValueError: If a duplicate delivery conflicts, an event ID changes
-                shipment, or the event fails normalization.
+                shipment, or the event fails the input checks.
         """
         record = normalize_event(event)
         sid = record["shipment_id"]
@@ -101,10 +99,8 @@ class RiskEngine:
                         self._owners.pop(old["event_id"], None)
                     self._evictions += 1
 
-                # We intentionally avoid an unbounded tombstone set. If a
-                # shipment returns after eviction, expose that limitation via
-                # the degraded prediction reasons rather than pretending the
-                # retained history is complete.
+                # We do not remember every shipment removed from memory.
+                # If one returns, explain that its earlier readings may be missing.
                 state = {
                     "records": {},
                     "discarded_through": None,
@@ -118,8 +114,8 @@ class RiskEngine:
             self._accepted += 1
 
             if len(state["records"]) > MAX_RECORDS_PER_SHIPMENT:
-                # Remove all revisions of the oldest event together; never resurrect
-                # a lower revision simply by removing its correcting revision.
+                # Remove an event and all its corrections together.
+                # This stops an old reading returning when its correction is removed.
                 latest_arrival = {}
                 for retained in state["records"].values():
                     event_id = retained["event_id"]
@@ -152,8 +148,8 @@ class RiskEngine:
                 whose ``received_at`` timestamp is at or before this instant.
 
         Returns:
-            ``Prediction`` containing probability, feature digest, model
-            version, and any degraded-context reasons.
+            ``Prediction`` containing probability, feature fingerprint, model
+            version, and reasons why the available information is incomplete.
 
         Raises:
             ValueError: If the shipment ID or decision time is invalid.
@@ -198,14 +194,14 @@ class RiskEngine:
             )
 
     def snapshot(self, destination: Path) -> None:
-        """Write a checksum-protected snapshot of retained engine state.
+        """Save the stored shipment history with a fingerprint to detect file changes.
 
         Args:
-            destination: File path that will receive canonical JSON bytes.
+            destination: File path where the history will be saved as repeatable JSON.
 
         Returns:
-            ``None``. The file is written atomically after the in-memory state
-            is encoded under lock.
+            ``None``. Other calls cannot change the history while it is converted
+            to JSON. The finished file then replaces the old one.
         """
         with self._lock:
             body = {
@@ -229,7 +225,7 @@ class RiskEngine:
                     for sid, state in self._ships.items()
                 ],
             }
-            # Hold the lock until the full snapshot has been encoded.
+            # Keep other calls from changing history until the JSON is complete.
             encoded = canonical(body)
             wrapper = canonical(
                 {"sha256": hashlib.sha256(encoded).hexdigest(), "state": body}
@@ -312,13 +308,13 @@ class RiskEngine:
         return result
 
     def reload_model(self, artifact_dir: Path) -> bool:
-        """Atomically swap to another valid model artifact.
+        """Check a new model, then switch to it while protecting ongoing calls.
 
         Args:
-            artifact_dir: Directory containing the candidate ``model.json``.
+            artifact_dir: Directory containing the new ``model.json``.
 
         Returns:
-            ``True`` when the new artifact loads and replaces the current
+            ``True`` when the new model loads and replaces the current
             model. ``False`` when loading or validation fails; in that case the
             previous model remains active.
         """
@@ -332,11 +328,11 @@ class RiskEngine:
         return True
 
     def stats(self):
-        """Return operational counters and retention limits.
+        """Show how much history is stored and which limits apply.
 
         Returns:
             Dictionary with retained shipment count, record count, capacity
-            settings, event-byte budget, accepted deliveries, evictions,
+            settings, maximum stored size of one event, accepted deliveries, evictions,
             trimmed records, and active model version.
         """
         with self._lock:
