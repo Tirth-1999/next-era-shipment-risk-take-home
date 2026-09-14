@@ -118,7 +118,7 @@ Added main README navigation, environment setup, server startup, retraining and 
 
 ## Checkpoint 18: improvement review and presentation
 
-Reviewed the implementation against the README and recorded priorities in personal/IMPROVEMENTS.md. The main submission concern is the documented omission of immature training rows from a contract that requests every checkpoint. Further priorities are explicit observation coverage, measured memory/latency, bounded snapshot parsing, minimum-version testing and validation on real data. No model or engine policy was changed during this review.
+Reviewed the implementation against the README and recorded priorities in personal/WALKTHROUGH.md (Improvement priorities). The main submission concern is the documented omission of immature training rows from a contract that requests every checkpoint. Further priorities are explicit observation coverage, measured memory/latency, bounded snapshot parsing, minimum-version testing and validation on real data. No model or engine policy was changed during this review.
 
 Created a nine-slide interview presentation in the UI’s green-and-cream theme, with editable evidence tables and speaker notes. It covers timing, features, labels, model selection, evaluation, engine behavior, remaining work and the live walkthrough. It is optional interview preparation alongside the demo. Next: review the contract concern, then rehearse the presentation and demonstration.
 
@@ -144,3 +144,7 @@ The first three demo pages now emphasize visible state: eligible reading cards, 
 Grouped personal learning and presentation materials under `personal/`. The root keeps the required implementation, tests, raw data, final model, decisions and runbook. Use `WALKTHROUGH.md` to rehearse the code in execution order and prepare for the five live follow-up tasks. Updated notebook paths, demo imports and commands; all 28 core and optional tests pass, and notebook code cells compile.
 
 The added runbook also belongs to personal preparation and now lives at `personal/RUNBOOK.md`. Essential setup, training, testing and replay commands remain in the root README.
+
+## Checkpoint 23: remove repository clutter
+
+Removed generated Python caches and installation metadata from Git tracking; these are recreated locally. Consolidated improvement priorities into the walkthrough and made FastAPI the single documented full-demo startup. Retained notebooks, exported tables and saved experiment results because they preserve the learning and reproducibility record.

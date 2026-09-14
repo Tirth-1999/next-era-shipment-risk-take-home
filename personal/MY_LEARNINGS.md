@@ -346,7 +346,7 @@ A reviewer needs a working startup command, an explanation of the evaluation spl
 
 The system passes 27 tests, but passing tests and meeting every interpretation of the assignment are different questions. The builder currently leaves immature checkpoints out because their outcomes are unknown. The README asks for a binary-labeled row at each checkpoint. This needs an explicit contract discussion rather than silently treating unknown as negative.
 
-The other priorities concern evidence: a certified observation boundary, measurements of memory and latency under load, and real-data evaluation before selecting an operating threshold. A more complicated model is not the first improvement supported by the current results. The detailed review is in personal/IMPROVEMENTS.md.
+The other priorities concern evidence: a certified observation boundary, measurements of memory and latency under load, and real-data evaluation before selecting an operating threshold. A more complicated model is not the first improvement supported by the current results. The detailed review is in personal/WALKTHROUGH.md (Improvement priorities).
 
 The presentation follows the same visual theme as the UI and includes notes for explaining each choice. It retains the synthetic-data and outcome-completeness limitations. No new model experiment was performed, and no claim is made that the proposed upgrades are complete. Discussion and rehearsal remain next.
 
@@ -372,3 +372,7 @@ The first three demo pages now emphasize visible state: eligible reading cards, 
 Development order and presentation order serve different purposes. We learned through notebooks, but an interviewer can follow one message through the contract, ingest, time filtering, features and prediction before discussing training and evaluation. Each explanation should identify the choice, reason and test evidence. Personal materials now live under `personal/`; required deliverables remain at the root. The walkthrough also calls out limits, including assumed label completeness and exclusion of immature checkpoints.
 
 The added runbook also belongs to personal preparation and now lives at `personal/RUNBOOK.md`. Essential setup, training, testing and replay commands remain in the root README.
+
+## Checkpoint 23: remove repository clutter
+
+Removed generated Python caches and installation metadata from Git tracking; these are recreated locally. Consolidated improvement priorities into the walkthrough and made FastAPI the single documented full-demo startup. Retained notebooks, exported tables and saved experiment results because they preserve the learning and reproducibility record.

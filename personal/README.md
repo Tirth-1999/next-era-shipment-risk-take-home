@@ -1,6 +1,6 @@
 # Tirth's interview preparation
 
-Start with [WALKTHROUGH.md](WALKTHROUGH.md). It gives the opening explanation, code order, decision rationale, and follow-up practice.
+For interview practice, use [WALKTHROUGH.md](WALKTHROUGH.md). For commands, use [RUNBOOK.md](RUNBOOK.md). The plan and learning journal are development history; you do not need to read them before each presentation.
 
 | Folder or file | Use |
 | --- | --- |
@@ -8,7 +8,6 @@ Start with [WALKTHROUGH.md](WALKTHROUGH.md). It gives the opening explanation, c
 | `notebooks/` | Learning checkpoints 1–14; open in order |
 | `MY_LEARNINGS.md` | What each checkpoint taught us |
 | `plan.md` | Development plan and history |
-| `IMPROVEMENTS.md` | Known gaps and improvement priorities |
 | `demo/` | Optional browser demo and FastAPI interview tools |
 | `tests/` | Optional demo/API tests |
 | `data/tables/` | Tables exported during exploration |

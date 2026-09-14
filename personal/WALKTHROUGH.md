@@ -213,3 +213,35 @@ Spend about one minute on the problem and two-clock example, then five minutes f
 Optional demo order: Start here for the correction example; Model results for evaluation; System checks for reliability; New stream for live input/configuration changes. Open API docs only when demonstrating the backend request. Every button should support a claim already explained.
 
 Close with: “The main guarantees are point-in-time inputs, reproducible scoring and explicit limits when information is missing. The strongest remaining uncertainty is real-world label coverage and predictive performance.”
+
+## 10. Improvement priorities
+
+These are remaining gaps, not completed upgrades.
+
+### 1. Resolve the training-row contract before submission
+
+`build_training_rows` omits checkpoints whose six-hour outcome window and 48-hour reporting allowance have not finished. The README asks for features, a binary label and metadata at every requested checkpoint. This is a real contract difference, already disclosed in DECISIONS.md. A single requested decision produces no rows under the current observation-cutoff rule.
+
+The reason is valid: an unknown outcome cannot honestly become label zero. The interface needs an agreed way to represent it. If the interface can change, return an eligibility status with every requested checkpoint and keep censored rows out of fitting. If the interface must stay fixed, defend the omission explicitly and retain counts. Do not quietly label recent rows negative just to match a row count.
+
+The builder also infers its observation cutoff from the latest decision time. A future revision should accept a separately supplied observation boundary or certified audit coverage. The prediction schedule is not evidence that all incident reports are complete.
+
+Evidence: README required implementation section, `src/dispatch_risk/training.py`, `tests/test_engine.py::test_label_boundary_availability_and_maturity`, DECISIONS.md.
+
+### 2. Measure resource use and strengthen boundary checks
+
+Shipment, record and event-size limits bound retained structures. They do not impose an exact process-memory ceiling. Scoring runs feature extraction under the engine lock, so long histories can delay other callers. Measure actual memory, scoring latency and snapshot pauses while ingestion and reload are active. Choose service targets before deciding whether finer locking or cached features are worthwhile.
+
+Restore currently reads an entire snapshot before validating its structural bounds. Add a byte-size limit before parsing if snapshots may come from untrusted or oversized sources. Exercise extreme finite numeric values and malformed artifacts as part of that hardening. Test the declared minimum Python 3.11 environment separately from the verified Python 3.14 environment.
+
+Evidence: `src/dispatch_risk/engine.py`, `src/dispatch_risk/features.py`, `pyproject.toml`, outputs/final_model/verification.json.
+
+### 3. Establish evidence for real use
+
+The held-out result has 25 incidents from synthetic data. The 48-hour allowance assumes mature outcome records are complete. Before operational use, confirm reporting coverage, evaluate several later time periods with real shipments, and check probability calibration within useful operational groups.
+
+Select an alert threshold using the costs of missed incidents, false alarms and available response capacity. The demonstration threshold of 20% does not establish that decision. If a calibration model becomes necessary, fit it on a separate calibration or validation partition rather than the existing final test data.
+
+Only then assess whether extra sensor features or a more complex model improve performance. The current evidence does not justify adding model complexity solely because it is available.
+
+Evidence: outputs/final_model/evaluation.json, notebooks 11–13, DECISIONS.md.
