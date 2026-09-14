@@ -110,3 +110,10 @@ To check every notebook with this environment in a temporary copy:
 ```
 
 The checker runs all 14 notebooks in order with fresh kernels and stops on the first error. It leaves the saved notebooks, tables and saved model filess unchanged. Allow roughly a minute locally; runtime depends on the machine.
+
+
+## If tests cannot find dispatch_risk
+
+I run tests from the repository root with `.venv/bin/python -m pytest`. The pytest settings in `pyproject.toml` add `src/` and the repository root to the import path. The recovery test also passes the source path to its separate Python process.
+
+The package name is `dispatch_risk`. I do not change imports to `src.dispatch_risk`. For standalone CLI commands on this workspace, I still use `PYTHONPATH=src .venv/bin/python -m dispatch_risk --help` if the editable installation is not picked up. Pytest's path setting applies only to tests.

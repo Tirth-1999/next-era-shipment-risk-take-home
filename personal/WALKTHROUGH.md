@@ -14,18 +14,20 @@ I start with the shipment problem before showing code or scores.
 
 I began with the supplied interface, event records, decision checkpoints, incident reports and generator. I explored in notebooks before transferring the behavior into the Python package.
 
-| Stage | What I learned or decided | Why it came first |
-| --- | --- | --- |
-| Notebooks 1–2 | Record shapes, duplicates, revisions | Understand which messages represent the same event |
-| 3–4 | Two clocks, measurement age, delay, three-hour features | Make inputs valid at the decision time |
-| 5 | Flatten JSON into tables, preserve raw order | Make inspection easier without silently cleaning away hazards |
-| 6–7 | Late reports and waiting long enough for incident reports | An absent report does not establish a negative |
-| 8–9 | Training examples and constant comparison model | Establish a trustworthy target and reference performance |
-| 10 | Logistic regression learning on teaching examples | Understand weights and intercept before comparisons |
-| 11–12 | Split by time, preparing model inputs and candidate comparison | Choose on validation, without opening test results |
-| 13–14 | Final evaluation, artifact export, separate process checks | Verify the fixed choice and how live predictions use the saved model |
-| Python implementation | Shared features, limited stored history, recovery, overlapping calls | Convert the experiment into the required engine |
-| Optional preparation | UI, presentation, API workbench | Help explain and exercise the completed implementation |
+
+| Stage                 | What I learned or decided                                            | Why it came first                                                    |
+| --------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Notebooks 1–2         | Record shapes, duplicates, revisions                                 | Understand which messages represent the same event                   |
+| 3–4                   | Two clocks, measurement age, delay, three-hour features              | Make inputs valid at the decision time                               |
+| 5                     | Flatten JSON into tables, preserve raw order                         | Make inspection easier without silently cleaning away hazards        |
+| 6–7                   | Late reports and waiting long enough for incident reports            | An absent report does not establish a negative                       |
+| 8–9                   | Training examples and constant comparison model                      | Establish a trustworthy target and reference performance             |
+| 10                    | Logistic regression learning on teaching examples                    | Understand weights and intercept before comparisons                  |
+| 11–12                 | Split by time, preparing model inputs and candidate comparison       | Choose on validation, without opening test results                   |
+| 13–14                 | Final evaluation, artifact export, separate process checks           | Verify the fixed choice and how live predictions use the saved model |
+| Python implementation | Shared features, limited stored history, recovery, overlapping calls | Convert the experiment into the required engine                      |
+| Optional preparation  | UI, presentation, API workbench                                      | Help explain and exercise the completed implementation               |
+
 
 For the interview, I follow the code sequence below.
 
@@ -33,15 +35,16 @@ For the interview, I follow the code sequence below.
 
 When a code name uses a technical term, explain it like this:
 
-| Code term | What to say aloud |
-| --- | --- |
-| Feature | A value the model uses, such as temperature or reading age |
-| Revision | A newer version of the same message |
-| Digest or hash | A fingerprint that changes when the data changes |
-| Snapshot | A saved copy of the engine's history and settings |
-| Eviction | Removing old shipment history to stay within the memory limit |
-| Invariant | A rule that must keep holding, such as duplicates having no extra effect |
-| Calibration | Whether predicted risks match how often incidents actually happen |
+
+| Code term      | What to say aloud                                                        |
+| -------------- | ------------------------------------------------------------------------ |
+| Feature        | A value the model uses, such as temperature or reading age               |
+| Revision       | A newer version of the same message                                      |
+| Digest or hash | A fingerprint that changes when the data changes                         |
+| Snapshot       | A saved copy of the engine's history and settings                        |
+| Eviction       | Removing old shipment history to stay within the memory limit            |
+| Invariant      | A rule that must keep holding, such as duplicates having no extra effect |
+| Calibration    | Whether predicted risks match how often incidents actually happen        |
 
 
 At each stop, I explain what the function does, what I pass in, why the rule exists, what comes back, and how I tested it.
@@ -64,7 +67,7 @@ My answer: “The two clocks are separate because measurement time and availabil
 
 ### Stop B: receive a message
 
-I open [engine.py](../src/dispatch_risk/engine.py), `RiskEngine.__init__` and `ingest`.
+I open [engine.py](../src/dispatch_risk/engine.py), `RiskEngine.__init`__ and `ingest`.
 
 Startup loads a valid model, starts an ordered list of shipment histories and lookup of which shipment owns each event, and creates a lock. An invalid initial artifact fails startup; no unsupported zero-risk fallback is invented.
 
@@ -132,11 +135,13 @@ Validation compared constant, logistic regression, shallow tree, random forest a
 
 The final model is fitted again on earlier data whose reporting wait has passed before the test period. The test result is evaluated after selection, not used to choose a winner.
 
-| Saved test evidence | Model | Constant |
-| --- | ---: | ---: |
-| Average precision | 0.981277 | 0.080906 |
-| Brier score | 0.003760 | 0.074380 |
+
+| Saved test evidence                    | Model      | Constant   |
+| -------------------------------------- | ---------- | ---------- |
+| Average precision                      | 0.981277   | 0.080906   |
+| Brier score                            | 0.003760   | 0.074380   |
 | At 20%: caught / missed / false alarms | 24 / 1 / 0 | 0 / 25 / 0 |
+
 
 There are 309 test checkpoints and 25 positives. AP measures ranking; Brier measures squared probability error. Neither a high score nor Brier alone proves calibration or launch readiness. Results for useful groups of shipments cover sensor source, freshness and missing trend. Small positive counts limit conclusions. Open [evaluation.json](../outputs/final_model/evaluation.json) for exact results, and notebook 13 for groups comparing predicted risk with the observed incident rate and uncertainty estimated by repeatedly resampling whole shipments.
 
@@ -157,16 +162,18 @@ Exact replay applies to the same runtime, artifact, settings and delivery sequen
 
 ## 6. Map the README's eight engine rules to evidence
 
-| Required behavior | Show |
-| --- | --- |
-| Duplicate, late, unordered, corrected events | `ingest` and `known_revisions` |
-| Repeated delivery has no extra effect | Exact event/revision comparison and duplicate tests |
-| Explicit UTC scoring | Timestamp normalization and `score(as_of)` |
-| Model version and repeatable fingerprint | `score`, model fingerprint, `Prediction.to_wire` |
-| Snapshot/restore | State capture, validation, continuation tests |
-| Bounded memory and supporting lookup tables | Shipment map, record cap, cleaning the event ID lookup |
-| Reload while scoring | Validation outside lock, switching models inside the lock |
-| Failed reload preserves service | Rejected candidate leaves current model intact |
+
+| Required behavior                            | Show                                                      |
+| -------------------------------------------- | --------------------------------------------------------- |
+| Duplicate, late, unordered, corrected events | `ingest` and `known_revisions`                            |
+| Repeated delivery has no extra effect        | Exact event/revision comparison and duplicate tests       |
+| Explicit UTC scoring                         | Timestamp normalization and `score(as_of)`                |
+| Model version and repeatable fingerprint     | `score`, model fingerprint, `Prediction.to_wire`          |
+| Snapshot/restore                             | State capture, validation, continuation tests             |
+| Bounded memory and supporting lookup tables  | Shipment map, record cap, cleaning the event ID lookup    |
+| Reload while scoring                         | Validation outside lock, switching models inside the lock |
+| Failed reload preserves service              | Rejected candidate leaves current model intact            |
+
 
 The final replay requirement is tested by feeding identical deliveries into empty engines and comparing prediction and snapshot bytes.
 
@@ -241,7 +248,7 @@ An invariant is a property that must remain true, such as an exact duplicate hav
 rg -n 'def ingest|def score|def known_revisions' src/dispatch_risk
 ```
 
-3. For two differing replay files, locate their first differing prediction:
+1. For two differing replay files, locate their first differing prediction:
 
 ```bash
 .venv/bin/python - <<'PY'
@@ -263,11 +270,11 @@ PY
 
 Prediction row numbers are not raw delivery row numbers because rejected duplicates produce no prediction. Trace the shipment and decision time back to the deliveries; add temporary diagnostic prints of delivery index and event ID if necessary. Remove diagnostic prints after the fix.
 
-4. I inspect `as_of`, `model_version`, `feature_digest`, probability and reasons why information is missing or old. Different model versions mean I am comparing different models. A different digest points toward selected readings or feature calculation. An unchanged digest with a different probability points toward model loading or scoring. Retention differences can also explain changed reasons.
-5. I reduce the input to one shipment and the original message, correction and checkpoint. Confirm the small sequence still reproduces the failure before changing the implementation.
-6. I add that sequence as a regression test in `tests/test_engine.py`. Use the existing `event()` helper and `engine` fixture when adding to that file. For historical correction behavior, capture `score(...).to_wire()` before ingesting the later revision, then assert equality at the old timestamp afterward. Also assert that the later timestamp uses a changed feature fingerprint. A constant test model may produce equal probabilities despite changed features, so checking probability alone can miss a bug.
-7. I inspect `known_revisions` in `features.py`: filter by receipt time before selecting the highest eligible revision. Preserve legitimate older revisions in `ingest`. Check whether removal of shipment history makes the requested historical reconstruction impossible.
-8. I run the new test, the full core suite, and both replay comparisons from Task 1 using fresh output folders.
+1. I inspect `as_of`, `model_version`, `feature_digest`, probability and reasons why information is missing or old. Different model versions mean I am comparing different models. A different digest points toward selected readings or feature calculation. An unchanged digest with a different probability points toward model loading or scoring. Retention differences can also explain changed reasons.
+2. I reduce the input to one shipment and the original message, correction and checkpoint. Confirm the small sequence still reproduces the failure before changing the implementation.
+3. I add that sequence as a regression test in `tests/test_engine.py`. Use the existing `event()` helper and `engine` fixture when adding to that file. For historical correction behavior, capture `score(...).to_wire()` before ingesting the later revision, then assert equality at the old timestamp afterward. Also assert that the later timestamp uses a changed feature fingerprint. A constant test model may produce equal probabilities despite changed features, so checking probability alone can miss a bug.
+4. I inspect `known_revisions` in `features.py`: filter by receipt time before selecting the highest eligible revision. Preserve legitimate older revisions in `ingest`. Check whether removal of shipment history makes the requested historical reconstruction impossible.
+5. I run the new test, the full core suite, and both replay comparisons from Task 1 using fresh output folders.
 
 **Other failure routes:** duplicate effects → `ingest`; memory growth → removal of shipment history/owner cleanup and record trimming; restore differences → snapshot order and model version; failed reload interrupting service → candidate validation and reference swap.
 
@@ -317,13 +324,15 @@ My answer: “This requirement is already configurable. With eight histories, th
 
 **If they ask for a different change:**
 
-| Request | Where to change | What else must be checked |
-| --- | --- | --- |
-| Six-hour feature past period | `features.py` and model compatibility checks | Feature version, fitted artifact, boundary tests, training and live prediction agreement |
-| Different future period being predicted | `training.py` plus artifact/output semantics and docs | Labels, maturity, splits, retraining, evaluation; this changes the prediction target |
-| Different record cap | `engine.py` | Trimming tests and snapshot compatibility; snapshots record the cap |
-| Exact RAM ceiling | New resource policy and measurements | Existing shipment counts are insufficient evidence |
-| Return every requested training checkpoint | Public row contract and builder | Agree how to represent unknown outcomes before changing binary labels |
+
+| Request                                    | Where to change                                       | What else must be checked                                                                |
+| ------------------------------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Six-hour feature past period               | `features.py` and model compatibility checks          | Feature version, fitted artifact, boundary tests, training and live prediction agreement |
+| Different future period being predicted    | `training.py` plus artifact/output semantics and docs | Labels, maturity, splits, retraining, evaluation; this changes the prediction target     |
+| Different record cap                       | `engine.py`                                           | Trimming tests and snapshot compatibility; snapshots record the cap                      |
+| Exact RAM ceiling                          | New resource policy and measurements                  | Existing shipment counts are insufficient evidence                                       |
+| Return every requested training checkpoint | Public row contract and builder                       | Agree how to represent unknown outcomes before changing binary labels                    |
+
 
 For feature or label changes, save experimental training under a new directory:
 
@@ -356,14 +365,16 @@ PY
 
 Narrow the discussion to these six questions:
 
-| Question | My answer | Code or evidence |
-| --- | --- | --- |
-| Why this split? | “I ordered shipment groups by their first checkpoint. Older groups train the model, later groups validate it, and the last group evaluates the fixed choice.” | `build_training_rows`, `train`, report `split` |
-| Can one shipment appear on both sides? | “Each shipment belongs to one shipment group. Repeated checkpoints stay together.” | Cohort assignment in `training.py` |
-| Could future information enter training? | “Features use eligible receipts at each checkpoint. The reporting wait must finish before the fitting cutoff, and input preparation settings are learned from the fitting rows.” | `known_revisions`, `_label`, `train` |
-| Why 48 hours? | “I assume reports have arrived after that wait. My comparisons with longer waits found no contradictions in this dataset. Real use needs confirmation of report coverage.” | Notebook 7, `GRACE`, decision record |
-| Why this model? | “The validation comparison used a declared probability error and simplicity rule. Logistic regression met that rule. The public trainer fits that selected family.” | Notebook 12, `validation_selection.json` |
-| What does the result establish? | “It performed well on later synthetic shipments under my label assumptions. Real shipment performance is still untested.” | Report limitations |
+
+| Question                                 | My answer                                                                                                                                                                        | Code or evidence                               |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Why this split?                          | “I ordered shipment groups by their first checkpoint. Older groups train the model, later groups validate it, and the last group evaluates the fixed choice.”                    | `build_training_rows`, `train`, report `split` |
+| Can one shipment appear on both sides?   | “Each shipment belongs to one shipment group. Repeated checkpoints stay together.”                                                                                               | Cohort assignment in `training.py`             |
+| Could future information enter training? | “Features use eligible receipts at each checkpoint. The reporting wait must finish before the fitting cutoff, and input preparation settings are learned from the fitting rows.” | `known_revisions`, `_label`, `train`           |
+| Why 48 hours?                            | “I assume reports have arrived after that wait. My comparisons with longer waits found no contradictions in this dataset. Real use needs confirmation of report coverage.”       | Notebook 7, `GRACE`, decision record           |
+| Why this model?                          | “The validation comparison used a declared probability error and simplicity rule. Logistic regression met that rule. The public trainer fits that selected family.”              | Notebook 12, `validation_selection.json`       |
+| What does the result establish?          | “It performed well on later synthetic shipments under my label assumptions. Real shipment performance is still untested.”                                                        | Report limitations                             |
+
 
 Know these values: test has 309 checkpoints and 25 positive checkpoints; AP 0.981277, Brier 0.003760. Constant baseline AP 0.080906, Brier 0.074380. At the illustrative 20% alert cutoff: 24 true positives, one false negative, zero false positives. Checkpoints are not independent incident counts: overlapping windows can refer to the same incident.
 
@@ -400,8 +411,8 @@ def test_cli_rejects_invalid_capacity(value):
     assert 'Traceback' not in result.stderr
 ```
 
-3. I run `.venv/bin/python -m pytest tests/test_cli.py -vv`. Confirm the intended assertion fails before editing the implementation. An unrelated import failure is not the expected failure.
-4. I add this helper above `main()` in `__main__.py`:
+1. I run `.venv/bin/python -m pytest tests/test_cli.py -vv`. Confirm the intended assertion fails before editing the implementation. An unrelated import failure is not the expected failure.
+2. I add this helper above `main()` in `__main__.py`:
 
 ```python
 def positive_shipments(value: str) -> int:
@@ -429,7 +440,7 @@ def positive_shipments(value: str) -> int:
     return capacity
 ```
 
-5. I replace the capacity argument declaration with:
+1. I replace the capacity argument declaration with:
 
 ```python
 parser.add_argument('--max-shipments', type=positive_shipments, default=10000)
@@ -490,20 +501,23 @@ The snippet verifies restored bytes and unchanged counters/version. The tests ad
 
 I treat this as a flexible rehearsal budget: 5 minutes for setup, 10 for the new stream, 15 for failure investigation, 10 for the changed requirement, 10 for evaluation, and 10 for the code edit. The interviewer may combine tasks or change the order. Narrate my next check briefly, run it, then explain the result. Do not spend the interview reading every command in this guide.
 
-
 ## 8. Questions and concise answers
 
-| Question | Answer |
-| --- | --- |
-| Why not always use the correction? | It was not available to the earlier prediction. |
-| Why keep two clocks? | One measures event time; one establishes knowledge time. |
-| Why is missing trend not zero? | Unknown slope is different from observed flat readings. |
-| Why not train on every decision? | Recent outcomes may be unknown; my exclusion is a documented contract difference. |
-| Why logistic regression? | It met the predeclared validation rule and is straightforward to inspect and export. |
-| Why memory limits? | Explicit README requirement; unlimited shipment or extra stored history would violate it. |
-| What happens after removal of shipment history? | Lost history limits reconstruction and duplicate identity; the prediction discloses incomplete history. |
-| Why reject customer notes? | Their suggested mechanisms conflict with temporal correctness, limited memory or safe serving; DECISIONS records each alternative. |
-| What would you improve first? | Explicit observation coverage and agreed way to represent unknown outcomes, then realistic load and real data validation. |
+
+| Question                                        | Answer                                                                                                                             |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Why not always use the correction?              | It was not available to the earlier prediction.                                                                                    |
+| Why keep two clocks?                            | One measures event time; one establishes knowledge time.                                                                           |
+| Why is missing trend not zero?                  | Unknown slope is different from observed flat readings.                                                                            |
+| Why not train on every decision?                | Recent outcomes may be unknown; my exclusion is a documented contract difference.                                                  |
+| Why logistic regression?                        | It met the predeclared validation rule and is straightforward to inspect and export.                                               |
+| Why memory limits?                              | Explicit README requirement; unlimited shipment or extra stored history would violate it.                                          |
+| What happens after removal of shipment history? | Lost history limits reconstruction and duplicate identity; the prediction discloses incomplete history.                            |
+| Why reject customer notes?                      | Their suggested mechanisms conflict with temporal correctness, limited memory or safe serving; DECISIONS records each alternative. |
+| What would you improve first?                   | Explicit observation coverage and agreed way to represent unknown outcomes, then realistic load and real data validation.          |
+
+
+
 
 ## 9. Suggested presentation order
 

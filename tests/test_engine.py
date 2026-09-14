@@ -2,6 +2,8 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 import json
+import os
+from pathlib import Path
 import subprocess
 import sys
 import pytest
@@ -97,7 +99,11 @@ def test_replay_snapshot_restore_and_continuation(tmp_path):
     assert a.stats()==restored.stats()
     assert a.score('fourth',T).to_wire()==restored.score('fourth',T).to_wire()
     code="from pathlib import Path; from dispatch_risk import RiskEngine; e=RiskEngine.restore(Path(__import__('sys').argv[1]),Path(__import__('sys').argv[2])); e.snapshot(Path(__import__('sys').argv[3]))"
-    subprocess.run([sys.executable,'-c',code,str(model),str(tmp_path/'b'),str(tmp_path/'fresh')],check=True)
+    # The new Python process needs the same source path as the test runner.
+    environment = os.environ.copy()
+    source = str(Path(__file__).resolve().parents[1] / 'src')
+    environment['PYTHONPATH'] = os.pathsep.join(filter(None, [source, environment.get('PYTHONPATH')]))
+    subprocess.run([sys.executable,'-c',code,str(model),str(tmp_path/'b'),str(tmp_path/'fresh')],check=True, env=environment)
     assert (tmp_path/'b').read_bytes()==(tmp_path/'fresh').read_bytes()
 
 

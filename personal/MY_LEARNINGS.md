@@ -404,3 +404,7 @@ Reordered DECISIONS.md around the ten customer suggestions. Each answer states R
 ## Checkpoint 29: my preparation notes
 
 I rewrote my plan around my current interview priorities. I kept the checkpoint history here and made the walkthrough and decision record read as my own explanations. I kept the original assignment wording and the technical results unchanged.
+
+## Checkpoint 30: fix test imports
+
+I reproduced the import error with `.venv/bin/python -m pytest tests`. Python was not adding the source folder through the editable installation. Earlier commands supplied PYTHONPATH, which hid this problem. I added pytest source paths and passed the source path to the recovery test's child process. I kept imports under the package name dispatch_risk. This changes test setup, not prediction logic.
