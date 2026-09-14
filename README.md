@@ -325,3 +325,13 @@ In a 60-minute technical interview, you will:
 - modify one requirement;
 - defend the statistical validity of your evaluation;
 - make a small code change while preserving replay determinism.
+
+## Interview API
+
+The **New stream** demo uses FastAPI. Install `python -m pip install -e '.[dev,demo]'`, stop any existing server on port 8765, and run:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m uvicorn demo.api:app --host 127.0.0.1 --port 8765
+```
+
+Open [the demo](http://127.0.0.1:8765/) or [interactive API docs](http://127.0.0.1:8765/docs). Generate a stream, compare deterministic replays, change the memory limit, and run tests after a local code edit. See [demo/README.md](demo/README.md#fastapi-interview-workbench) for saved evidence, debugging and restart instructions.

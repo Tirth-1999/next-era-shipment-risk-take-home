@@ -1,6 +1,6 @@
 'use strict';
 const $ = id => document.getElementById(id);
-let state, busy = false;
+
 const session = sessionStorage.getItem('risk-demo-session') || crypto.randomUUID();
 sessionStorage.setItem('risk-demo-session', session);
 const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -8,124 +8,188 @@ const num = (value, places = 2) => value === null || value === undefined ? 'Unkn
 const time = value => new Date(value).toISOString().slice(11, 16);
 const stamp = value => `${new Date(value).toISOString().slice(0,10)} ${time(value)}`;
 const utcInput = value => new Date(value).toISOString().slice(0,19);
-const features = {
- latest_temperature_c:['Latest temperature','°C'], measurement_age_minutes:['Measurement age','min'],
- arrival_delay_minutes:['Arrival delay','min'], temperature_missing:['Temperature missing',''],
- temperature_count:['Readings in window',''], temperature_mean_c:['Mean temperature','°C'],
- temperature_max_c:['Maximum temperature','°C'], temperature_trend_c_per_hour:['Temperature trend','°C/h'],
- temperature_span_hours:['Observation span','h']
-};
-const reasons = {
- shipment_not_retained:'Shipment is not retained. The score uses the learned overall incident rate.',
- retention_coverage_unverified:'Earlier history may be missing after eviction.',
- history_truncated:'Some history was removed to meet the record cap.',
- no_usable_temperature:'No usable temperature is available at this time.',
- stale_temperature:'The latest reading is more than three hours old.',
- future_device_clock_excluded:'A measurement ahead of its receipt time was excluded.'
-};
-async function request(path, body) {
- const response = await fetch(path, body ? {method:'POST', headers:{'Content-Type':'application/json','X-Demo-Session':session},body:JSON.stringify(body)} : {headers:{'X-Demo-Session':session}});
+async function request(path, body, token=session) {
+ const response = await fetch(path, body ? {method:'POST', headers:{'Content-Type':'application/json','X-Demo-Session':token},body:JSON.stringify(body)} : {headers:{'X-Demo-Session':token}});
  const result = await response.json();
- if (!response.ok) throw new Error(result.error || 'The request failed.');
+ if (!response.ok) throw new Error(typeof result.detail==='string' ? result.detail : result.error || JSON.stringify(result.detail) || 'The request failed.');
  return result;
-}
-function notice(message, error=false) {
- $('notice').textContent=message; $('notice').classList.toggle('error',error);
-}
-async function action(name, extra={}) {
- if(busy)return;
- busy=true;document.body.classList.add('busy');
- try {
-  const value=$('as-of').value;
-  if(name!=='reset' && !value)throw new Error('Choose a UTC prediction time.');
-  state=await request('/api/action',{action:name,shipment:$('shipment').value,as_of:value ? value+'Z' : undefined,...extra});
-  if(name==='reset') $('follow').checked=false;
-  render(); notice(state.message);
- } catch(error){notice(error.message,true);}
- finally{busy=false;document.body.classList.remove('busy');}
-}
-function render() {
- $('scenario').value=state.scenario;$('capacity').value=state.capacity;
- $('scenario-note').textContent=state.scenario==='lesson' ? 'Seven invented deliveries. A small example you can check by hand.' : 'Synthetic source data, processed in its original file order.';
- $('position').textContent=`${state.position.toLocaleString()} / ${state.total.toLocaleString()}`;
- $('progress').max=state.total;$('progress').value=state.position;
- $('shipment').innerHTML=state.shipments.map(s=>`<option value="${escapeHTML(s)}">${escapeHTML(s)}</option>`).join('');
- $('shipment').value=state.shipment;$('as-of').value=utcInput(state.as_of);
- const next=state.next_event;
- $('next-event').innerHTML=next ? `<span>NEXT DELIVERY</span><b>${escapeHTML(next.event_id)} · revision ${next.revision}</b><span>${escapeHTML(next.shipment_id)} · received ${stamp(next.received_at)}</span>` : '<b>End of the stream.</b><span>Reset to replay from the beginning.</span>';
- $('step').disabled=!next;$('batch').disabled=!next || state.scenario==='lesson';$('batch').textContent='Next 1,000';
- $('noon').hidden=state.scenario!=='lesson';$('restore').disabled=!state.has_snapshot;
- $('probability').innerHTML=`${(state.prediction.probability*100).toFixed(1)}<span>%</span>`;
- $('horizon').textContent=`${stamp(state.as_of)} → ${stamp(state.horizon_end)} UTC`;
- $('model-version').textContent=state.prediction.model_version;$('feature-digest').textContent=state.prediction.feature_digest;
- $('quality').innerHTML=state.prediction.degraded ? `<div class="quality warn"><b>Limited evidence</b><ul>${state.prediction.reasons.map(r=>`<li>${escapeHTML(reasons[r] || r)}</li>`).join('')}</ul></div>` : '<div class="quality">No engine degradation flags at this checkpoint.</div>';
- const f=state.features;
- $('key-features').innerHTML=['latest_temperature_c','measurement_age_minutes','temperature_trend_c_per_hour'].map(k=>`<div><label>${features[k][0]}</label><strong>${num(f[k])} <small>${f[k]===null?'':features[k][1]}</small></strong></div>`).join('');
- $('all-features').innerHTML=Object.entries(features).map(([k,[label,unit]])=>`<div class="feature-item"><span>${label}</span><b>${num(f[k])}${f[k]===null || !unit?'':' '+unit}</b></div>`).join('');
- $('table-count').textContent=`${state.displayed_deliveries} of ${state.shipment_deliveries} deliveries`;
- $('readings-body').innerHTML=state.deliveries.length ? state.deliveries.map(e=>`<tr><td>${escapeHTML(e.event_id)}<small>File row ${e.file_row} · ${escapeHTML(e.kind)}</small></td><td>r${e.revision}</td><td>${stamp(e.device_time)}</td><td>${stamp(e.received_at)}</td><td>${escapeHTML(e.value ?? 'Missing')}${e.kind==='temperature_c'?' °C':''}</td><td><span class="badge ${e.status==='In temperature window'?'eligible':/Not |excluded/.test(e.status)?'warning':''}">${escapeHTML(e.status)}</span></td></tr>`).join('') : '<tr><td colspan="6">No deliveries for this shipment have been processed yet.</td></tr>';
- const st=state.stats;
- $('stats').innerHTML=[[`${st.shipments} / ${st.max_shipments}`,'Shipments'],[st.retained_records,'Records'],[st.evictions,'Evictions'],[st.trimmed,'Trimmed records']].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
- $('retained').textContent=`Retained, oldest update first: ${state.retained_shipments.slice(0,8).join(', ') || 'none'}${state.retained_shipments.length>8?'…':''}. Up to ${st.max_records_per_shipment} records per shipment; ${st.event_id_index} event IDs indexed.`;
- $('window-label').textContent=`${stamp(state.lookback_start)} → ${time(state.as_of)} UTC`;
- $('outcome-content').hidden=true;$('outcome-content').replaceChildren();$('reveal').textContent='Reveal audit reports';
- drawChart();
-}
-function drawChart() {
- const rows=state.deliveries.filter(e=>typeof e.value==='number' && Number.isFinite(e.value) && e.kind==='temperature_c');
- const width=560,height=265,left=42,right=16,top=25,bottom=40;
- const start=Date.parse(state.lookback_start), end=Date.parse(state.as_of);
- const minX=Math.min(start,...rows.map(e=>Date.parse(e.device_time))),maxX=Math.max(end,...rows.map(e=>Date.parse(e.device_time)))+10*60000;
- const low=Math.min(0,...rows.map(e=>e.value)),high=Math.max(10,...rows.map(e=>e.value))+2;
- const x=v=>left+(v-minX)/(maxX-minX)*(width-left-right),y=v=>height-bottom-(v-low)/(high-low)*(height-top-bottom);
- let svg=`<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="${x(start)}" y="${top}" width="${x(end)-x(start)}" height="${height-top-bottom}" fill="#eff4e7"/>`;
- for(let i=0;i<=4;i++){
-  const v=low+(high-low)*i/4;
-  svg+=`<line x1="${left}" x2="${width-right}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e8de"/><text x="${left-9}" y="${y(v)+4}" text-anchor="end" fill="#788679" font-size="10">${num(v,1)}°</text>`;
- }
- for(let i=0;i<=4;i++){
-  const v=minX+(maxX-minX)*i/4;
-  svg+=`<text x="${x(v)}" y="${height-15}" text-anchor="middle" fill="#788679" font-size="10">${time(v)}</text>`;
- }
- svg+=`<line x1="${x(end)}" x2="${x(end)}" y1="${top}" y2="${height-bottom}" stroke="#65876b" stroke-dasharray="4 4"/><text x="${x(end)-4}" y="15" text-anchor="end" fill="#4e6e50" font-size="10">PREDICTION TIME</text>`;
- const eligible=rows.filter(e=>e.status==='In temperature window').sort((a,b)=>Date.parse(a.device_time)-Date.parse(b.device_time));
- if(eligible.length>1)svg+=`<polyline points="${eligible.map(e=>`${x(Date.parse(e.device_time))},${y(e.value)}`).join(' ')}" stroke="#2e674c" fill="none" stroke-width="2"/>`;
- for(const e of rows){
-  const good=e.status==='In temperature window';
-  svg+=`<circle cx="${x(Date.parse(e.device_time))}" cy="${y(e.value)}" r="${good?5:3.5}" fill="${good?'#2e674c':'#c3cbc2'}" stroke="white" stroke-width="1.5"><title>${escapeHTML(`${e.event_id} r${e.revision}: ${e.value}°C; ${stamp(e.device_time)} UTC; ${e.status}`)}</title></circle>`;
- }
- if(!rows.length)svg+=`<text x="${width/2}" y="${height/2}" text-anchor="middle" fill="#72816e" font-size="12">No numeric temperature deliveries to display</text>`;
- $('chart').innerHTML=svg+'</svg>';
- $('chart').setAttribute('aria-label',`${rows.length} temperature deliveries shown; ${eligible.length} in the temperature window. Prediction at ${stamp(state.as_of)} UTC. Other deliveries may be excluded or not retained.`);
 }
 async function showEvaluation(){
  try{
   const r=await request('/api/evaluation');
   const metric=(v,d=4)=>v===null || v===undefined?'Not available':Number(v).toFixed(d);
   $('evaluation-content').innerHTML=`<span class="eyebrow">${escapeHTML(r.model_kind.replaceAll('_',' '))} · FIXED BEFORE TEST EVALUATION</span><div class="eval-metrics"><div><b>${r.test.rows}</b><span>Held-out checkpoints</span></div><div><b>${r.test.positives}</b><span>Incident outcomes</span></div><div><b>${r.development_rows}</b><span>Development rows used for final fit</span></div></div><h2>Selected model vs. constant baseline</h2><div class="table-scroll"><table><thead><tr><th>Model</th><th>Average precision ↑</th><th>Brier score ↓</th><th>Log loss ↓</th><th>Recall at 20%</th><th>Precision at 20%</th></tr></thead><tbody>${[['Selected model',r.test],['Constant baseline',r.constant_test]].map(([label,m])=>`<tr><td>${label}</td><td>${metric(m.average_precision)}</td><td>${metric(m.brier)}</td><td>${metric(m.log_loss)}</td><td>${metric(m.recall_at_0_2,2)}</td><td>${metric(m.precision_at_0_2,2)}</td></tr>`).join('')}</tbody></table></div><p class="help">Average precision measures ranking. Brier and log loss measure probability error. The 20% threshold is an illustration, not an operating recommendation.</p><h2>Performance by source, freshness and trend availability</h2><div class="table-scroll"><table><thead><tr><th>Slice</th><th>Group</th><th>Rows</th><th>Incidents</th><th>Average precision</th><th>Brier</th></tr></thead><tbody>${r.slices.map(s=>`<tr><td>${escapeHTML(s.dimension)}</td><td>${escapeHTML(s.value.replaceAll('_',' '))}</td><td>${s.rows}</td><td>${s.positives}</td><td>${metric(s.average_precision)}</td><td>${metric(s.brier)}</td></tr>`).join('')}</tbody></table></div><h2>What these results can tell us</h2><p class="help">${escapeHTML(r.split.rule)}. Validation begins ${stamp(r.split.validation_start)} UTC; test begins ${stamp(r.split.test_start)} UTC. The assumed observation cutoff is ${stamp(r.split.observation_cutoff)} UTC.</p><ul class="help">${r.limitations.map(l=>`<li>${escapeHTML(l)}</li>`).join('')}</ul><p class="help">Read from the saved evaluation report. The UI does not retrain, tune a threshold or use outcomes to create features.</p>`;
+  const detail=$('evaluation-content').innerHTML;
+  const m=r.test;
+  const countsKnown=[m.true_positive,m.false_negative,m.false_positive].every(v=>Number.isFinite(v));
+  $('evaluation-content').innerHTML=`<div class="button-row"><button id="show-model" class="primary" aria-pressed="true">Our model</button><button id="show-baseline" class="secondary" aria-pressed="false">Constant baseline</button></div><div id="model-visual" aria-live="polite"></div><p class="help">Synthetic test data · 20% alert cutoff</p><details><summary>Why is this a fair test?</summary><p>Fit on older shipments → choose on validation → test on later shipments. No shared shipments. Labels wait six hours plus 48 hours for reports.</p><p>That reporting completeness is assumed. These results do not establish real-world performance.</p></details><details class="technical-section"><summary>Full test report</summary>${detail}</details>`;
+  const paint=(baseline)=>{
+   const chosen=baseline?r.constant_test:r.test;
+   const valid=[chosen.true_positive,chosen.false_negative,chosen.false_positive,chosen.positives].every(Number.isFinite);
+   $('model-visual').innerHTML=valid ? `<p class="simple-caption">${baseline?'Same risk for every shipment':'Logistic regression'} · ${chosen.positives} incidents</p><div class="incident-dots" aria-label="${chosen.true_positive} caught, ${chosen.false_negative} missed">${Array.from({length:Math.min(chosen.positives,100)},(_,i)=>`<span class="${i<chosen.true_positive?'caught':'missed'}" aria-hidden="true"></span>`).join('')}</div><div class="result-counts">${[['Caught',chosen.true_positive],['Missed',chosen.false_negative],['False alarms',chosen.false_positive]].map(([label,value])=>`<div><strong>${value}</strong><span>${label}</span></div>`).join('')}</div>` : '<p>Insufficient test data.</p>';
+   $('show-model').setAttribute('aria-pressed',String(!baseline));$('show-baseline').setAttribute('aria-pressed',String(baseline));
+  };
+  $('show-model').onclick=()=>paint(false);$('show-baseline').onclick=()=>paint(true);paint(false);
+
+
  }catch(e){$('evaluation-content').textContent=`Evaluation unavailable: ${e.message}`;}
 }
 for(const button of document.querySelectorAll('[data-tab]'))button.addEventListener('click',()=>{
  for(const pane of document.querySelectorAll('.tab'))pane.hidden=pane.id!==button.dataset.tab;
- for(const nav of document.querySelectorAll('[data-tab]'))nav.classList.toggle('active',nav===button);
+ for(const nav of document.querySelectorAll('.nav[data-tab]'))nav.classList.toggle('active',nav.dataset.tab===button.dataset.tab);
+
+ window.scrollTo({top:0,behavior:'smooth'});
  if(button.dataset.tab==='evaluation')showEvaluation();
 });
-$('reset').onclick=()=>action('reset',{scenario:$('scenario').value,capacity:Number($('capacity').value)});
-$('scenario').onchange=()=>action('reset',{scenario:$('scenario').value,capacity:$('scenario').value==='lesson'?2:32});
-$('step').onclick=()=>action('step',{count:1,follow_time:$('follow').checked});
-$('batch').onclick=()=>action('step',{count:1000,follow_time:$('follow').checked});
-$('score').onclick=()=>action('view');$('shipment').onchange=()=>action('view');
-$('noon').onclick=()=>{$('as-of').value='2026-01-01T12:00:00';action('view');};
-$('save').onclick=()=>action('save');$('restore').onclick=()=>action('restore');
-$('valid-reload').onclick=()=>action('reload_valid');$('invalid-reload').onclick=()=>action('reload_invalid');
-$('reveal').onclick=async()=>{
- if(busy)return;
- try{
-  const viewedShipment=state.shipment, viewedScenario=state.scenario;
-  const result=await request('/api/outcomes');
-  if(viewedShipment!==state.shipment || viewedScenario!==state.scenario)return;
-  $('outcome-content').hidden=false;
-  $('outcome-content').innerHTML=`<p>${escapeHTML(result.note)}</p>${result.reports.length ? result.reports.map(r=>`<p><b>Incident:</b> ${stamp(r.incident_at)} UTC · <b>Report available:</b> ${stamp(r.label_available_at)} UTC</p>`).join('') : '<p>No incident report is listed for this shipment. Its outcome is not certified negative.</p>'}`;
- }catch(e){notice(e.message,true);}
+// Keep guided playback separate so it cannot reset the user's manual exploration.
+const storySession = sessionStorage.getItem('risk-story-session') || crypto.randomUUID();
+sessionStorage.setItem('risk-story-session', storySession);
+let storyIndex = -1, storyBusy = false;
+const storyCopy = [
+ ['A reading arrives: 8°C.', 'The sensor measured 8°C at 9 AM. The message reached us at 9:05 AM. At 11 AM, we can use it.', 'At 11 AM, this is the temperature information we have.', 'The measurement time tells us how old the reading is. The arrival time tells us when we could first use it.'],
+ ['The same message arrives again.', 'This is a retry of the original message. It does not give us another measurement.', 'The message arrived twice, but the engine counts it once. The prediction stays the same.', 'The engine recognizes the same event ID and revision. Repeating that delivery must not add another reading or change the prediction.'],
+ ['A correction arrives at noon: 5°C.', 'We are still asking about the 11 AM prediction. At 11 AM, this correction had not arrived, so the engine still uses 8°C.', 'The corrected reading is 5°C, but we did not know that at 11 AM. We cannot use future information to rewrite the earlier prediction.', 'We have now delivered the noon correction to the engine, but the requested prediction time remains 11 AM. Only revisions received by that time are eligible.'],
+ ['Now ask for a prediction at noon.', 'The correction has arrived by this time. The engine can now use the corrected 5°C reading.', 'At noon, we know about the correction, so we use it. What the engine knows depends on when we ask.', 'Moving to noon also moves the lookback and forecast windows. The corrected 9 AM reading supplies the latest temperature, but sits exactly outside the open left edge of the three-hour summary window. A score change cannot be attributed only to the temperature correction.']
+];
+
+/** Rebuild one guided checkpoint through the real API; Back never fakes engine state. */
+async function showStory(index) {
+ if(storyBusy)return;
+ storyBusy=true;
+ for(const id of ['story-next','story-back','story-restart']) $(id).disabled=true;
+ $('story-error').hidden=true;
+ try {
+  const baseline=await request('/api/action',{action:'reset',scenario:'lesson',capacity:2},storySession);
+  let result=baseline;
+  if(index>0) result=await request('/api/action',{action:'step',count:Math.min(index,2),as_of:'2026-01-01T11:00:00Z',follow_time:false},storySession);
+  if(index===3) result=await request('/api/action',{action:'view',as_of:'2026-01-01T12:00:00Z'},storySession);
+  storyIndex=index;
+  const [title,explanation,script,why]=storyCopy[index];
+  $('story-step').textContent=`STEP ${index+1} OF 4`;
+  $('story-title').textContent=title;
+  $('story-explanation').textContent=['Measured at 9 AM. Arrived at 9:05.','Same message. Counted once.','Noon correction cannot change 11 AM.','At noon, the correction is available.'][index];
+  $('timing-visual').hidden=false;
+  $('timing-visual').innerHTML=`<div class="${index<3?'available':'superseded'}"><strong>8°C</strong><span>Arrived 9:05 AM</span><b>${index<3?'Used':'Replaced'}</b></div><span>→</span><div class="${index===3?'available':'superseded'}"><strong>5°C</strong><span>Arrives at noon</span><b>${index===3?'Used':index===2?'Too late for 11 AM':'Not yet available'}</b></div>`;
+  $('story-facts').hidden=false;
+  $('story-facts').innerHTML=[['Prediction time',`${time(result.as_of)} UTC`],['6-hour risk',`${result.prediction.probability > 0 && result.prediction.probability < 0.001 ? 'Less than 0.1' : num(result.prediction.probability*100,1)}%`]].map(([label,value])=>`<div><dt>${label}</dt><dd>${value}</dd></div>`).join('');
+  const same=result.prediction.feature_digest===baseline.prediction.feature_digest && result.prediction.probability===baseline.prediction.probability;
+  $('story-check').hidden=false;
+  $('story-check').textContent=index===0 ? 'Prediction covers 11 AM to 5 PM.' : index<3 ? (same ? '✓ Same inputs · Same prediction' : 'Unexpected result: the prediction changed. Investigate before presenting this step.') : 'Prediction now covers noon to 6 PM. The latest temperature is 5°C.';
+  $('story-script').hidden=false;
+  $('story-script').textContent=`What you can say: “${script}”`;
+  $('story-detail').hidden=false; $('story-detail').open=false;
+  $('story-why').textContent=why;
+  document.querySelectorAll('.story-steps li').forEach((item,i)=>{
+   if(i===index)item.setAttribute('aria-current','step'); else item.removeAttribute('aria-current');
+  });
+  $('story-restart').hidden=false;
+  $('story-next').textContent=['Next: repeat the message →','Next: deliver the correction →','Next: move to noon →','Walkthrough complete'][index];
+  $('story-finish').hidden=index!==3;
+ } catch(error) {
+  $('story-error').textContent=`Could not load this step: ${error.message}. Try again.`;
+  $('story-error').hidden=false;
+ } finally {
+  storyBusy=false;
+  $('story-next').disabled=storyIndex===3;
+  $('story-back').disabled=storyIndex<=0;
+  $('story-restart').disabled=false;
+ }
+}
+$('story-next').onclick=()=>showStory(Math.min(storyIndex+1,3));
+$('story-back').onclick=()=>showStory(Math.max(storyIndex-1,0));
+$('story-restart').onclick=()=>showStory(0);
+
+
+/** Persist the navigation preference while keeping the menu button accessible. */
+function setSidebar(collapsed) {
+ document.body.classList.toggle('sidebar-collapsed',collapsed);
+ $('sidebar-toggle').setAttribute('aria-expanded',String(!collapsed));
+ $('sidebar-toggle').setAttribute('aria-label',collapsed?'Expand navigation':'Collapse navigation');
+ sessionStorage.setItem('risk-sidebar-collapsed',String(collapsed));
+}
+$('sidebar-toggle').onclick=()=>setSidebar(false);
+$('sidebar-close').onclick=()=>setSidebar(true);
+setSidebar(sessionStorage.getItem('risk-sidebar-collapsed')==='true' || window.innerWidth < 800);
+
+
+const checkSession = crypto.randomUUID();
+let checkIndex = 0;
+
+/** Run each reliability check from a known state using the existing engine API. */
+async function runCheck() {
+ $('check-run').disabled=true;
+ $('check-reset').disabled=true;
+ $('check-error').hidden=true;
+ try {
+  const call=(body)=>request('/api/action',body,checkSession);
+  const initial=await call({action:'reset',scenario:'lesson',capacity:2});
+  let result, title, description, evidence, meaning;
+  if(checkIndex===0) {
+   result=await call({action:'step',count:4});
+   if(result.stats.shipments!==2 || result.stats.evictions!==1)throw new Error('Memory check did not match the expected limit.');
+   title='Memory stays within the limit.';
+   description='Three shipments arrived. There is room for two.';
+   evidence=`${result.stats.shipments} kept · ${result.stats.evictions} removed`;
+   meaning='The oldest shipment is removed. Its lost history is flagged in predictions.';
+  } else if(checkIndex===1) {
+   await call({action:'save'});
+   await call({action:'step',count:4});
+   result=await call({action:'restore'});
+   if(JSON.stringify(result.prediction)!==JSON.stringify(initial.prediction))throw new Error('Restored prediction differs.');
+   title='Saved state comes back correctly.';
+   description='Save the state, process more messages, then restore it.';
+   evidence='Original prediction restored';
+   meaning='The server also checks that the saved and restored prediction bytes match.';
+  } else {
+   result=await call({action:'reload_invalid'});
+   if(JSON.stringify(result.prediction)!==JSON.stringify(initial.prediction))throw new Error('Prediction changed after failed reload.');
+   title='A failed update does not stop scoring.';
+   description='Try loading a model file that does not exist.';
+   evidence='Previous model still serving';
+   meaning='The update is rejected. The prediction stays unchanged.';
+  }
+  $('check-number').textContent=`CHECK ${checkIndex+1} OF 3 · PASSED`;
+  $('check-title').textContent=title;
+  $('check-description').textContent=['3 shipments → 2 spaces','Save → advance → restore','Broken update → previous model'][checkIndex];
+  $('check-visual').innerHTML=checkIndex===0 ? '<span class="removed">A removed</span><span>B kept</span><span>C kept</span>' : checkIndex===1 ? '<span>Saved</span><b> = </b><span>Restored</span>' : '<span class="removed">Update rejected</span><span>Original running</span>';
+  $('check-result').textContent=evidence; $('check-result').hidden=false;
+  $('check-meaning').textContent=meaning; $('check-meaning').hidden=false;
+  checkIndex++;
+  $('check-run').textContent=['','Next: check restore →','Next: try a failed update →','All three checks passed'][checkIndex];
+  $('check-reset').hidden=false;
+ } catch(error) {
+  $('check-error').textContent=`Check failed: ${error.message}`;
+  $('check-error').hidden=false;
+ } finally {
+  $('check-run').disabled=checkIndex===3;
+  $('check-reset').disabled=false;
+ }
+}
+$('check-run').onclick=runCheck;
+$('check-reset').onclick=()=>{
+ checkIndex=0;
+ $('check-number').textContent='THREE SMALL CHECKS';
+ $('check-title').textContent='What happens when memory fills up?';
+ $('check-description').textContent='3 shipments → 2 spaces';
+ $('check-visual').innerHTML='<span>A</span><span>B</span><span>C</span>';
+ $('check-result').hidden=true; $('check-meaning').hidden=true;
+ $('check-error').hidden=true; $('check-reset').hidden=true;
+ $('check-run').textContent='Run memory check →'; $('check-run').disabled=false;
 };
-request('/api/state').then(s=>{state=s;render();notice(s.message);}).catch(e=>notice(`Could not load the engine: ${e.message}`,true));
+
+/** Generate and verify a fresh stream using the FastAPI backend. */
+$('run-stream').onclick=async()=>{
+ const button=$('run-stream'); button.disabled=true;
+ $('run-result').textContent='Generating and checking…';
+ try {
+  const result=await request('/api/interview/stream',{seed:Number($('run-seed').value),shipments:Number($('run-size').value),max_shipments:Number($('run-limit').value)});
+  $('run-result').innerHTML=`<div class="result-counts"><div><strong>${num(result.events,0)}</strong><span>Messages</span></div><div><strong>${result.first_replay.peak_shipments}</strong><span>Peak shipments retained</span></div></div><ul class="run-checks">${Object.entries(result.checks).map(([key,passed])=>`<li>${passed?'✓':'✗'} ${escapeHTML(key.replaceAll('_',' '))}</li>`).join('')}</ul><p class="help">Saved: ${escapeHTML(result.output_directory)}</p><details><summary>Request &amp; evidence</summary><pre>${escapeHTML(JSON.stringify(result,null,2))}</pre></details>`;
+ }catch(error){$('run-result').textContent=`Could not run: ${error.message}. Start the FastAPI server; see demo/README.md.`;}
+ finally{button.disabled=false;}
+};
+$('run-tests').onclick=async()=>{
+ $('run-tests').disabled=true; $('test-output').textContent='Running tests…';
+ try {const result=await request('/api/interview/tests',{});$('test-output').textContent=(result.passed?'PASS':'FAIL')+'\n'+result.output;}
+ catch(error){$('test-output').textContent=error.message;}
+ finally{$('run-tests').disabled=false;}
+};

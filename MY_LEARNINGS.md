@@ -349,3 +349,20 @@ The system passes 27 tests, but passing tests and meeting every interpretation o
 The other priorities concern evidence: a certified observation boundary, measurements of memory and latency under load, and real-data evaluation before selecting an operating threshold. A more complicated model is not the first improvement supported by the current results. The detailed review is in IMPROVEMENTS.md.
 
 The presentation follows the same visual theme as the UI and includes notes for explaining each choice. It retains the synthetic-data and outcome-completeness limitations. No new model experiment was performed, and no claim is made that the proposed upgrades are complete. Discussion and rehearsal remain next.
+
+
+## Checkpoint 20: a simpler demo
+
+The default view now explains one shipment in four steps: original reading, duplicate, late correction, and a noon prediction. Each step uses the real engine and includes a sentence to say aloud. Guided playback has its own session so it does not reset manual exploration. Technical controls and exact evaluation metrics remain available on demand. The sidebar can be collapsed and remembers its setting for the tab. Small positive probabilities are shown as less than 0.1% rather than rounded to zero.
+
+The exploration tab now opens with only the usable temperature, estimated risk, and next/reset buttons. Model results open with caught, missed, and false-alarm counts. Explanations and full diagnostic controls are collapsed to keep the initial view short.
+
+Replaced the manual playback dashboard with System checks. Each click demonstrates a specific guarantee using a small live example: bounded shipment count, exact snapshot recovery, and continued scoring after a rejected model reload. Full-stream replay remains a CLI task in RUNBOOK.md.
+
+Navigation now has three distinct demo purposes: prediction timing, system reliability, and model evaluation. Removed the separate speaking-notes tab because the guided walkthrough already provides those prompts. The footer stays at the bottom of short pages and follows content on longer pages.
+
+## Checkpoint 21: demonstrating a changed input or requirement
+
+A new seed creates another synthetic stream. Replaying it twice checks deterministic behavior; it does not prove accuracy on real data. Holding the seed fixed while changing capacity isolates the configuration change. Saved inputs, source fingerprints, predictions and snapshots let us investigate failures. Running tests in a fresh process checks local code edits; the API itself must restart to load edited engine modules.
+
+The first three demo pages now emphasize visible state: eligible reading cards, memory/recovery status, and an interactive model-versus-baseline incident display. Supporting explanations stay collapsed. The new-stream API remains available separately for interview exercises.

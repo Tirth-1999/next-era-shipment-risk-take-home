@@ -121,3 +121,20 @@ Added main README navigation, environment setup, server startup, retraining and 
 Reviewed the implementation against the README and recorded priorities in IMPROVEMENTS.md. The main submission concern is the documented omission of immature training rows from a contract that requests every checkpoint. Further priorities are explicit observation coverage, measured memory/latency, bounded snapshot parsing, minimum-version testing and validation on real data. No model or engine policy was changed during this review.
 
 Created a nine-slide interview presentation in the UI’s green-and-cream theme, with editable evidence tables and speaker notes. It covers timing, features, labels, model selection, evaluation, engine behavior, remaining work and the live walkthrough. It is optional interview preparation alongside the demo. Next: review the contract concern, then rehearse the presentation and demonstration.
+
+
+## Checkpoint 20: a simpler demo
+
+The default view now explains one shipment in four steps: original reading, duplicate, late correction, and a noon prediction. Each step uses the real engine and includes a sentence to say aloud. Guided playback has its own session so it does not reset manual exploration. Technical controls and exact evaluation metrics remain available on demand. The sidebar can be collapsed and remembers its setting for the tab. Small positive probabilities are shown as less than 0.1% rather than rounded to zero.
+
+The exploration tab now opens with only the usable temperature, estimated risk, and next/reset buttons. Model results open with caught, missed, and false-alarm counts. Explanations and full diagnostic controls are collapsed to keep the initial view short.
+
+Replaced the manual playback dashboard with System checks. Each click demonstrates a specific guarantee using a small live example: bounded shipment count, exact snapshot recovery, and continued scoring after a rejected model reload. Full-stream replay remains a CLI task in RUNBOOK.md.
+
+Navigation now has three distinct demo purposes: prediction timing, system reliability, and model evaluation. Removed the separate speaking-notes tab because the guided walkthrough already provides those prompts. The footer stays at the bottom of short pages and follows content on longer pages.
+
+## Checkpoint 21: interview API
+
+Added optional FastAPI stream generation, two-replay checks, persisted evidence and a fixed pytest endpoint. New-stream data is separate from the original evaluation. The UI supports a capacity change; source edits remain local and require an API restart before replay. Actual failures produce evidence, rather than simulated failures being presented as discovered bugs.
+
+The first three demo pages now emphasize visible state: eligible reading cards, memory/recovery status, and an interactive model-versus-baseline incident display. Supporting explanations stay collapsed. The new-stream API remains available separately for interview exercises.

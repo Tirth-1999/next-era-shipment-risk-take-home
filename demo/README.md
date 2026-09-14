@@ -18,20 +18,31 @@ PYTHONPATH=src .venv/bin/python -m demo.server
 
 Open http://127.0.0.1:8765. Use `--port`, `--artifact` or `--data` to choose another local port, model directory or dataset. The default model is `outputs/final_model`; create it with `python -m dispatch_risk train` if missing.
 
-The page has three views:
+The page has three demo tabs and a presentation link:
 
-- **Replay a shipment:** step through the small correction example or the supplied event stream, choose a UTC prediction time, inspect features and delivery eligibility, and test snapshot/restore and reload.
-- **Review the model:** read the saved evaluation report, baseline and operational slices. No fitting or model selection happens in the browser.
-- **Walkthrough notes:** follow the example in order, with prompts for explaining each decision.
+- **Start here:** four steps showing a reading, a duplicate, a late correction, and a noon prediction.
+- **System checks:** one button at a time checks shipment capacity, snapshot restore, and failed reload. Each check starts from a known small example and uses the real engine. These are demonstrations, not load tests.
+- **Model results:** caught, missed, and false-alarm counts; the full report is expandable.
+- **Presentation:** the nine-slide deck in the browser.
 
-The small example is invented teaching data. It uses the saved model to show engine behavior; its individual probabilities are not an evaluation. The supplied-data mode preserves file delivery order. Turn on “Follow each delivery’s shipment and receipt time” when moving through large batches. Shipment capacity takes effect on reset.
+The right sidebar can be collapsed. The previous dataset selector and manual playback dashboard were removed because they obscured the purpose of the demo. Use RUNBOOK.md for full-stream replay and stress-test commands. Guided prediction and system checks use separate sessions. Restarting the server clears in-memory sessions.
 
-Each tab gets its own playback session. Refreshing keeps that tab’s session; resetting clears its saved snapshot. The server keeps at most eight tab sessions; opening more can discard the oldest session. Restarting the server clears them all. Snapshots live in temporary local directories. This demo loads the finite source dataset for inspection; its process-memory usage is separate from the engine’s retention counters.
+This is optional interview practice. The assessed engine works without the UI.
 
-Predictions come directly from `RiskEngine`. The feature panel reads retained events through a public snapshot, calls the shared feature functions, and verifies that its digest matches the prediction. The table marks raw duplicate deliveries, unavailable revisions, discarded history and excluded device clocks. Only the most recent 200 deliveries for the selected shipment are displayed; the table reports its displayed/total count.
+## FastAPI interview workbench
 
-“Reload same valid model” reloads the existing artifact. “Try invalid reload” passes a missing artifact and verifies that the original prediction remains unchanged. These controls demonstrate the reload contract without claiming to compare two trained models. Restore rewinds both the engine and the demo’s playback position and compares the saved prediction bytes.
+Install the optional API dependencies and start from the repository root:
 
-The server binds to loopback and uses only Python’s standard library plus the installed engine. There are no external scripts, fonts, hosted services or new dependencies. This is a local demonstration, not a multi-user service.
+```bash
+python -m pip install -e '.[dev,demo]'
+PYTHONPATH=src .venv/bin/python -m uvicorn demo.api:app --host 127.0.0.1 --port 8765
+```
 
-The assignment explicitly says not to spend time on UI. This optional folder was added for interview practice after the engine was completed and can be omitted from the submission. The engine and its package installation do not import the demo. If omitting it, omit `tests/test_demo.py` as well; the remaining tests cover the assessed implementation.
+For a uv-managed environment: `uv sync --extra dev --extra notebook --extra demo`.
+Stop the old `demo.server` process first if it occupies port 8765. The original standard-library server supports the teaching views; the **New stream** actions require FastAPI.
+
+Open `/` for the demo, `/docs` for interactive API requests, `/openapi.json` for the schema, and `/presentation` for slides. Swagger's default docs load assets from a CDN and require internet; the demo and API execution run locally after installation.
+
+**New stream** calls `POST /api/interview/stream` with seed, shipment count and capacity. The backend calls the supplied deterministic generator, then replays delivery order twice through the saved model. It writes raw data, both prediction streams, snapshots and `report.json` under a unique `outputs/interview/` folder. Files are retained for inspection; remove unwanted run folders manually. It compares prediction and snapshot hashes and checks shipment capacity after every delivery. It reports the first capacity violation if one occurs. A replay mismatch requires comparing the two saved files; no failure is fabricated.
+
+Use the same seed with a different memory limit to demonstrate a requirement change. For a code change, edit the implementation and its test locally; **Run repository tests** starts pytest in a fresh process. Restart the API before replaying changed engine code. The UI does not edit source automatically. Repeated generation tests robustness, not accuracy on independent real data. The original held-out report remains separate.

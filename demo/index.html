@@ -1,22 +1,55 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shipment risk · Replay lab</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
 <body>
-<aside class="sidebar"><a class="brand" href="/" aria-label="Shipment risk home"><span class="brand-icon">↗</span><span>SHIPMENT<br><b>RISK LAB</b></span></a><div class="side-label">INTERVIEW WORKSPACE</div><nav><button class="nav active" data-tab="replay">01 <span>Replay a shipment</span></button><button class="nav" data-tab="evaluation">02 <span>Review the model</span></button><button class="nav" data-tab="guide">03 <span>Walkthrough notes</span></button><a class="nav" href="/presentation">04 <span>Presentation ↗</span></a></nav><div class="side-bottom"><span class="live-dot"></span> Runs locally<br><p>One engine. The same rules<br>as the Python implementation.</p><span class="small-tag">OPTIONAL INTERVIEW DEMO</span></div></aside>
-<main><header><span>POINT-IN-TIME PREDICTION</span><span class="header-meta">Cold-chain telemetry <i></i> All times UTC</span></header>
-<div id="notice" role="status" aria-live="polite">Connecting to the engine…</div>
-<section id="replay" class="tab">
-<div class="title-row"><div><div class="eyebrow">01 / DELIVERY PLAYBACK</div><h1>See what the engine knew.</h1><p class="subtitle">Move through the stream. Keep the prediction time fixed. See why the distinction matters.</p></div><span class="pill">6-hour prediction horizon</span></div>
-<div class="control-bar"><label>Example<select id="scenario"><option value="lesson">The late correction</option><option value="sample">Supplied dataset · full stream</option></select></label><label>Shipment limit · on reset<input id="capacity" type="number" min="1" max="10000" value="2"></label><button id="reset" class="secondary">Reset playback</button><span class="control-note" id="scenario-note">Seven invented deliveries. A small example you can check by hand.</span></div>
-<div class="workspace">
-<section class="card replay-controls"><div class="section-top"><span class="eyebrow">THE STREAM</span><span class="counter" id="position">—</span></div><h2>Delivery position</h2><progress id="progress" max="7" value="1"></progress><div id="next-event" class="next-event"></div><div class="button-row"><button id="step" class="primary">Next delivery <span>→</span></button><button id="batch" class="secondary">Next 100</button></div><label class="check"><input type="checkbox" id="follow"> Follow each delivery’s shipment and receipt time</label><p class="help">Delivery order can move backward in time. A new delivery is not necessarily a new measurement.</p><hr><label>Inspect shipment<select id="shipment"></select></label><label>Score as of · UTC<input type="datetime-local" id="as-of" step="1"></label><div class="button-row"><button id="score" class="secondary">Update prediction</button><button id="noon" class="text-button">Try noon →</button></div><p class="help">The engine uses only retained revisions received by this time.</p></section>
-<section class="card chart-card"><div class="section-top"><div><span class="eyebrow">AVAILABLE EVIDENCE</span><h2>Temperature over time</h2></div><span class="legend"><i class="point"></i> In window <i class="point muted-point"></i> Other delivery</span></div><div id="chart" role="img" aria-label="Temperature readings and three-hour lookback"></div><div class="chart-caption"><span id="window-label">—</span><span>Shaded area: 3-hour lookback</span></div><div class="feature-strip" id="key-features"></div></section>
-<section class="card prediction-card"><div class="section-top"><span class="eyebrow">ENGINE OUTPUT</span><span class="live-dot"></span></div><h2>Incident probability</h2><div class="probability" id="probability">—</div><p class="horizon" id="horizon">Over the next six hours</p><div id="quality"></div><p class="help">A model estimate from synthetic training data. This is not a safety decision or a temperature limit.</p><details><summary>Model & feature identity</summary><label class="hash-label">Model version</label><code id="model-version"></code><label class="hash-label">Feature digest</label><code id="feature-digest"></code></details></section>
-</div>
-<section class="card readings"><div class="section-top"><div><span class="eyebrow">WHAT COUNTS, AND WHY</span><h2>Delivered readings <small id="table-count"></small></h2></div><span class="help">Selected shipment · original delivery order</span></div><div class="table-scroll"><table><thead><tr><th>Row / event</th><th>Revision</th><th>Measured · UTC</th><th>Received · UTC</th><th>Value</th><th>At this prediction time</th></tr></thead><tbody id="readings-body"></tbody></table></div><p class="help table-foot">“In temperature window” means an input is eligible, not that it caused the predicted risk. Duplicate rows are shown for inspection and counted once.</p></section>
-<div class="lower-grid"><section class="card"><span class="eyebrow">ALL NINE INPUTS</span><h2>Features sent to the model</h2><div id="all-features" class="feature-list"></div><p class="help">A missing trend needs two distinct measurement times. It is different from a measured trend of zero.</p></section><section class="card"><div class="section-top"><div><span class="eyebrow">STATE & RECOVERY</span><h2>What the engine retains</h2></div><span class="pill compact">Live counters</span></div><div id="stats" class="stats"></div><p id="retained" class="help"></p><div class="button-row wrap"><button id="save" class="secondary">Save snapshot</button><button id="restore" class="secondary" disabled>Restore snapshot</button></div><div class="button-row wrap"><button id="valid-reload" class="text-button">Reload same valid model</button><button id="invalid-reload" class="text-button">Try invalid reload</button></div><p class="help">Restore returns playback to the saved point. Reload checks use the current artifact or a missing artifact; no alternative model is trained here.</p></section></div>
-<section class="card outcome"><div><span class="eyebrow">OUTCOME, REVEALED LATER</span><h2>What did the audit report?</h2><p class="help">Reports stay separate from the prediction inputs. No report does not prove that no incident happened.</p></div><button id="reveal" class="secondary">Reveal audit reports</button><div id="outcome-content" hidden></div></section>
+<button id="sidebar-toggle" class="sidebar-toggle" aria-controls="sidebar" aria-expanded="true" aria-label="Collapse navigation">☰ <span>Menu</span></button>
+<aside id="sidebar" class="sidebar"><button id="sidebar-close" class="sidebar-close" aria-label="Collapse navigation" title="Collapse navigation">→</button><a class="brand" href="/" aria-label="Shipment risk home"><span class="brand-icon">↗</span><span>SHIPMENT<br><b>RISK LAB</b></span></a><div class="side-label">INTERVIEW WORKSPACE</div><nav><button class="nav active" data-tab="story">01 <span>Start here</span></button><button class="nav" data-tab="replay">02 <span>System checks</span></button><button class="nav" data-tab="evaluation">03 <span>Model results</span></button><button class="nav" data-tab="interview">04 <span>New stream</span></button><a class="nav" href="/docs" target="_blank" rel="noopener">API docs ↗</a><a class="nav" href="/presentation">05 <span>Presentation ↗</span></a></nav><div class="side-bottom"><span class="live-dot"></span> Runs locally<br><p>One engine. The same rules<br>as the Python implementation.</p><span class="small-tag">OPTIONAL INTERVIEW DEMO</span></div></aside>
+<main>
+
+<section id="story" class="tab">
+
+<h1>Which reading can we use?</h1>
+<p class="story-intro">Choose a moment. Watch the reading and risk change.</p>
+
+<ol class="story-steps" aria-label="Demo steps"><li>1. A reading arrives</li><li>2. The message repeats</li><li>3. A correction arrives late</li><li>4. Move to noon</li></ol>
+<article class="story-scene" aria-live="polite">
+<p id="story-step" class="eyebrow">READY WHEN YOU ARE</p>
+<h2 id="story-title">Start with the 8°C reading.</h2>
+<p id="story-explanation"></p>
+<div id="timing-visual" class="timing-visual" hidden></div>
+<dl id="story-facts" class="story-facts" hidden></dl>
+<p id="story-check" class="story-check" hidden></p>
+
+<details id="story-detail" hidden><summary>Why / what to say</summary><p id="story-why"></p><blockquote id="story-script" hidden></blockquote></details>
+</article>
+<div class="story-actions"><button id="story-back" class="secondary" disabled>← Back</button><button id="story-next" class="primary">Start the demo →</button><button id="story-restart" class="text-button" hidden>Start over</button></div>
+<p id="story-error" role="alert" hidden></p>
+<p class="help">Synthetic example · All times UTC.</p>
+<div id="story-finish" hidden><button class="secondary" data-tab="replay">Next: check the system →</button><button class="text-button" data-tab="evaluation">See how the model performed →</button></div>
 </section>
-<section id="evaluation" class="tab" hidden><div class="eyebrow">02 / THE SAVED EVALUATION</div><h1>How did the model perform?</h1><p class="subtitle">The model was chosen on validation data, then checked on later shipments.</p><div id="evaluation-content" class="card">Loading evaluation…</div></section>
-<section id="guide" class="tab" hidden><div class="eyebrow">03 / A FIVE-MINUTE WALKTHROUGH</div><h1>One shipment, two clocks.</h1><p class="subtitle">Use the small example first. The full dataset follows the same engine rules.</p><div class="guide-grid"><article class="card"><span class="step-number">01</span><h2>Start with what was known.</h2><p>The 8°C reading was measured at 9 AM and received at 9:05. At 11 AM it is two hours old, with a five-minute arrival delay.</p></article><article class="card"><span class="step-number">02</span><h2>A retry adds no evidence.</h2><p>Click Next delivery once. The same event and revision arrive again. The table shows the retry; the model’s feature digest and prediction stay the same.</p></article><article class="card"><span class="step-number">03</span><h2>A correction arrives later.</h2><p>Click Next delivery again. The corrected value is 5°C, received at noon. Keep scoring at 11 AM: it cannot change the past. Choose Try noon to use the correction.</p></article><article class="card"><span class="step-number">04</span><h2>Memory has a limit.</h2><p>With capacity two, deliver shipments B and C. A is evicted. Inspect A and read the incomplete-history reason. The engine returns its learned prior while A is absent.</p></article><article class="card"><span class="step-number">05</span><h2>Recover the same state.</h2><p>Save a snapshot, advance, then restore. The server compares the saved and restored prediction bytes. Try an invalid reload: the prior model keeps serving.</p></article><article class="card"><span class="step-number">06</span><h2>Keep the conclusion modest.</h2><p>The supplied data is synthetic. Negative labels assume reports are complete after the six-hour horizon plus 48 hours. The model’s score is not a deployment decision.</p></article></div></section>
+<section id="replay" class="tab" hidden>
+<h1>Does the system hold up?</h1>
+
+<article class="simple-panel" aria-live="polite">
+<p id="check-number" class="eyebrow">THREE SMALL CHECKS</p>
+<h2 id="check-title">What happens when memory fills up?</h2>
+<p id="check-description">3 shipments → 2 spaces</p><div id="check-visual" class="check-visual"><span>A</span><span>B</span><span>C</span></div>
+<p id="check-result" class="check-result" hidden></p>
+<details><summary>Why it matters</summary><p id="check-meaning">Old history must be removed when capacity is full.</p></details>
+</article>
+<div class="button-row"><button id="check-run" class="primary">Run memory check →</button><button id="check-reset" class="text-button" hidden>Start again</button></div>
+<p id="check-error" role="alert" hidden></p>
+<p class="help">Live checks on a small example. Full stress tests run separately.</p>
+</section>
+<section id="evaluation" class="tab" hidden><h1>Did it work?</h1><p class="subtitle">Tested on later shipments.</p><div id="evaluation-content" class="card">Loading evaluation…</div></section>
+<section id="interview" class="tab" hidden>
+<h1>A new stream. A live check.</h1>
+<p class="subtitle">Generate → replay twice → compare.</p>
+<div class="control-bar"><label>Seed<input id="run-seed" type="number" value="1927" min="0" max="2147483647"></label><label>Shipments<input id="run-size" type="number" value="80" min="3" max="700"></label><label>Memory limit<input id="run-limit" type="number" value="32" min="1" max="128"></label></div>
+<button id="run-stream" class="primary">Generate &amp; check →</button>
+<div id="run-result" aria-live="polite"></div>
+<details class="technical-section"><summary>Change a requirement</summary><p>Change the memory limit above, then rerun with the same seed.</p></details>
+<details class="technical-section"><summary>Investigate a failure or change code</summary><p>Open the saved report. Compare replay files and the first failed row, if reported.</p><p>Edit the Python source and its test locally. Run tests below. Restart the API before replaying edited engine code.</p><button id="run-tests" class="secondary">Run repository tests</button><pre id="test-output"></pre></details>
+<p class="help">Replay checks only. Model accuracy stays in Model results.</p>
+</section>
 <footer>Shipment Risk Lab <span>Shared feature logic · deterministic replay · local execution</span></footer></main>
 </body></html>
