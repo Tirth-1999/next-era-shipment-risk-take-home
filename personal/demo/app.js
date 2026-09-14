@@ -184,7 +184,7 @@ $('run-stream').onclick=async()=>{
  try {
   const result=await request('/api/interview/stream',{seed:Number($('run-seed').value),shipments:Number($('run-size').value),max_shipments:Number($('run-limit').value)});
   $('run-result').innerHTML=`<div class="result-counts"><div><strong>${num(result.events,0)}</strong><span>Messages</span></div><div><strong>${result.first_replay.peak_shipments}</strong><span>Peak shipments retained</span></div></div><ul class="run-checks">${Object.entries(result.checks).map(([key,passed])=>`<li>${passed?'✓':'✗'} ${escapeHTML(key.replaceAll('_',' '))}</li>`).join('')}</ul><p class="help">Saved: ${escapeHTML(result.output_directory)}</p><details><summary>Request &amp; evidence</summary><pre>${escapeHTML(JSON.stringify(result,null,2))}</pre></details>`;
- }catch(error){$('run-result').textContent=`Could not run: ${error.message}. Start the FastAPI server; see personal/demo/README.md.`;}
+ }catch(error){$('run-result').textContent=`Could not run: ${error.message}. Start the FastAPI server; see personal/README.md.`;}
  finally{button.disabled=false;}
 };
 $('run-tests').onclick=async()=>{

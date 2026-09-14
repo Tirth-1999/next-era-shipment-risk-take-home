@@ -357,7 +357,7 @@ The default view now explains one shipment in four steps: original reading, dupl
 
 The exploration tab now opens with only the usable temperature, estimated risk, and next/reset buttons. Model results open with caught, missed, and false-alarm counts. Explanations and full diagnostic controls are collapsed to keep the initial view short.
 
-Replaced the manual playback dashboard with System checks. Each click demonstrates a specific guarantee using a small live example: bounded shipment count, exact snapshot recovery, and continued scoring after a rejected model reload. Full-stream replay remains a CLI task in RUNBOOK.md.
+Replaced the manual playback dashboard with System checks. Each click demonstrates a specific guarantee using a small live example: bounded shipment count, exact snapshot recovery, and continued scoring after a rejected model reload. Full-stream replay remains a CLI task in personal/README.md.
 
 Navigation now has three distinct demo purposes: prediction timing, system reliability, and model evaluation. Removed the separate speaking-notes tab because the guided walkthrough already provides those prompts. The footer stays at the bottom of short pages and follows content on longer pages.
 
@@ -371,8 +371,10 @@ The first three demo pages now emphasize visible state: eligible reading cards, 
 
 Development order and presentation order serve different purposes. We learned through notebooks, but an interviewer can follow one message through the contract, ingest, time filtering, features and prediction before discussing training and evaluation. Each explanation should identify the choice, reason and test evidence. Personal materials now live under `personal/`; required deliverables remain at the root. The walkthrough also calls out limits, including assumed label completeness and exclusion of immature checkpoints.
 
-The added runbook also belongs to personal preparation and now lives at `personal/RUNBOOK.md`. Essential setup, training, testing and replay commands remain in the root README.
+The added runbook also belongs to personal preparation and now lives at `personal/README.md`. Essential setup, training, testing and replay commands remain in the root README.
 
 ## Checkpoint 23: remove repository clutter
 
 Removed generated Python caches and installation metadata from Git tracking; these are recreated locally. Consolidated improvement priorities into the walkthrough and made FastAPI the single documented full-demo startup. Retained notebooks, exported tables and saved experiment results because they preserve the learning and reproducibility record.
+
+Documentation consolidation: combined the runbook and demo guide into `personal/README.md`. Use it for commands and `WALKTHROUGH.md` for rehearsal; this journal and the plan retain development history.

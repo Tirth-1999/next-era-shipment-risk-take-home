@@ -53,6 +53,6 @@ Snapshots encode canonical JSON under the lock, including LRU order, records, di
 
 ## Scope and reproduction
 
-Implemented the public builder, training, engine, CLI, snapshots/restore, bounded retention, model reload, and focused invariant tests. See `personal/RUNBOOK.md` for exact commands. Not implemented: broker offset transactions, real-time SLA/load testing, distributed state, authenticated model signing, automatic drift retraining, or features from door/compressor/location. The implementation is intended for the local exercise; these remain outside its scope.
+Implemented the public builder, training, engine, CLI, snapshots/restore, bounded retention, model reload, and focused invariant tests. See `personal/README.md` for exact commands. Not implemented: broker offset transactions, real-time SLA/load testing, distributed state, authenticated model signing, automatic drift retraining, or features from door/compressor/location. The implementation is intended for the local exercise; these remain outside its scope.
 
 Generated files in `data/` total approximately 0.40 MB when individually gzip-compressed, below the 5 MB requirement. Notebook learning artifacts are retained separately from the portable serving artifact. No network is required for training/scoring after declared dependencies are installed. Verification here used Python 3.14; the declared minimum is 3.11 but that version was not separately tested.

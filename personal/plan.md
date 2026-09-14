@@ -6,13 +6,13 @@ The fourteen notebooks and the Python engine are complete. The engine builds tra
 
 The last implementation check passed 20 tests. Two replays produced identical predictions and snapshots. A separate stream with 12,881 deliveries stayed within a 32-shipment limit. The held-out model results were AP 0.981277 and Brier 0.003760, based on 309 examples and 25 incidents. Those figures describe synthetic data under an assumed reporting-completeness policy; they are not a deployment claim.
 
-The optional local interview demo is now implemented in `personal/demo/`. Run it using the instructions in `personal/demo/README.md`, then use the walkthrough to review the finished code and practise explaining a change to one requirement.
+The optional local interview demo is now implemented in `personal/demo/`. Run it using the instructions in `personal/README.md`, then use the walkthrough to review the finished code and practise explaining a change to one requirement.
 
 ## What we are trying to build
 
 For one shipment at one decision time, estimate the chance of a temperature incident in the following six hours. Use only telemetry available by that decision time. Later incident reports can provide training labels, but cannot become prediction inputs.
 
-[README.md](../README.md) is the original assignment. [DECISIONS.md](../DECISIONS.md) records the implemented choices and their limits. [RUNBOOK.md](RUNBOOK.md) has commands to run the solution. [personal/MY_LEARNINGS.md](MY_LEARNINGS.md) follows the experiments and discussions in order.
+[README.md](../README.md) is the original assignment. [DECISIONS.md](../DECISIONS.md) records the implemented choices and their limits. [run instructions](README.md#cli-replay-and-recovery) has commands to run the solution. [personal/MY_LEARNINGS.md](MY_LEARNINGS.md) follows the experiments and discussions in order.
 
 ## How to work through the remaining concepts
 
@@ -70,7 +70,7 @@ It also states a seven-hour maximum and says: “Do not spend time on UI, infras
 
 **Purpose:** make one prediction easy to explain. The demo should show which readings the engine used, why other readings were excluded, and what changes when another delivery arrives. It should help tell a five-minute story without adding a second implementation of the model.
 
-**Status:** implemented after approval to build. It uses Python’s standard library, the existing engine and local HTML/CSS/JavaScript. No new dependencies were added. The design below records the agreed scope; `personal/demo/README.md` describes the working controls.
+**Status:** implemented after approval to build. It uses Python’s standard library, the existing engine and local HTML/CSS/JavaScript. No new dependencies were added. The design below records the agreed scope; `personal/README.md` describes the working controls.
 
 ### First version: one local page
 
@@ -129,7 +129,7 @@ The default view now explains one shipment in four steps: original reading, dupl
 
 The exploration tab now opens with only the usable temperature, estimated risk, and next/reset buttons. Model results open with caught, missed, and false-alarm counts. Explanations and full diagnostic controls are collapsed to keep the initial view short.
 
-Replaced the manual playback dashboard with System checks. Each click demonstrates a specific guarantee using a small live example: bounded shipment count, exact snapshot recovery, and continued scoring after a rejected model reload. Full-stream replay remains a CLI task in RUNBOOK.md.
+Replaced the manual playback dashboard with System checks. Each click demonstrates a specific guarantee using a small live example: bounded shipment count, exact snapshot recovery, and continued scoring after a rejected model reload. Full-stream replay remains a CLI task in personal/README.md.
 
 Navigation now has three distinct demo purposes: prediction timing, system reliability, and model evaluation. Removed the separate speaking-notes tab because the guided walkthrough already provides those prompts. The footer stays at the bottom of short pages and follows content on longer pages.
 
@@ -143,8 +143,10 @@ The first three demo pages now emphasize visible state: eligible reading cards, 
 
 Grouped personal learning and presentation materials under `personal/`. The root keeps the required implementation, tests, raw data, final model, decisions and runbook. Use `WALKTHROUGH.md` to rehearse the code in execution order and prepare for the five live follow-up tasks. Updated notebook paths, demo imports and commands; all 28 core and optional tests pass, and notebook code cells compile.
 
-The added runbook also belongs to personal preparation and now lives at `personal/RUNBOOK.md`. Essential setup, training, testing and replay commands remain in the root README.
+The added runbook also belongs to personal preparation and now lives at `personal/README.md`. Essential setup, training, testing and replay commands remain in the root README.
 
 ## Checkpoint 23: remove repository clutter
 
 Removed generated Python caches and installation metadata from Git tracking; these are recreated locally. Consolidated improvement priorities into the walkthrough and made FastAPI the single documented full-demo startup. Retained notebooks, exported tables and saved experiment results because they preserve the learning and reproducibility record.
+
+Documentation consolidation: combined the runbook and demo guide into `personal/README.md`. Use it for commands and `WALKTHROUGH.md` for rehearsal; this journal and the plan retain development history.

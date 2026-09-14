@@ -161,7 +161,7 @@ The final replay requirement is tested by feeding identical deliveries into empt
 
 ### A new event stream
 
-Use the browser's New stream page or the commands in [RUNBOOK.md](RUNBOOK.md). Set a new seed; record it. Inspect event count, capacity checks, prediction hashes and snapshot hashes. Generated data and replay evidence are saved under `personal/outputs/interview/`.
+Use the browser's New stream page or the commands in [run instructions](README.md#cli-replay-and-recovery). Set a new seed; record it. Inspect event count, capacity checks, prediction hashes and snapshot hashes. Generated data and replay evidence are saved under `personal/outputs/interview/`.
 
 A different seed exercises robustness within the same generator. It does not establish accuracy on independently collected data. If the panel supplies its own directory, pass that directory to the CLI instead of replacing it with generated data.
 

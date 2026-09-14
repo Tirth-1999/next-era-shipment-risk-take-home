@@ -13,7 +13,7 @@ python -m dispatch_risk train --artifact outputs/final_model
 python -m dispatch_risk replay --artifact outputs/final_model --max-shipments 32 --output outputs/replay
 ```
 
-The sample data and portable model are included. To regenerate sample data, run `python tools/generate_dataset.py`. Training and scoring run offline after dependencies are installed. See [RUNBOOK.md](personal/RUNBOOK.md) for fresh-stream and recovery commands, and [DECISIONS.md](DECISIONS.md) for policies and limitations.
+The sample data and portable model are included. To regenerate sample data, run `python tools/generate_dataset.py`. Training and scoring run offline after dependencies are installed. See [run instructions](personal/README.md) for fresh-stream and recovery commands, and [DECISIONS.md](DECISIONS.md) for policies and limitations.
 
 ## Repository layout
 
@@ -82,7 +82,7 @@ Chronological evaluation estimates performance on later shipment cohorts more cr
 | Concurrent scoring and safe reload                           | Engine locking, candidate validation before swap, and retention of the previous model after a failed reload.                                                                                                                                                                                        |
 | Dangerous failure-mode tests                                 | [tests](tests) covers temporal correctness, repeated replay, retention, snapshot corruption, reload, and concurrency. Run `python -m pytest`.                                                                                                                                                       |
 | Customer notes and timebox exclusions                        | [DECISIONS.md](DECISIONS.md) answers all ten customer notes with the safer contract and lists omitted work.                                                                                                                                                                                         |
-| Follow-up interview                                          | [RUNBOOK.md](personal/RUNBOOK.md) covers a new stream, failed-invariant investigation, and how to verify a requirement change.                                                                                                                                                                               |
+| Follow-up interview                                          | [run instructions](personal/README.md) covers a new stream, failed-invariant investigation, and how to verify a requirement change.                                                                                                                                                                               |
 
 
 **Known contract difference:** the training builder excludes immature checkpoints instead of returning a binary label for every requested decision. Unknown outcomes cannot safely be assigned zero. Requested/censored counts are recorded in metadata. [DECISIONS.md](DECISIONS.md) explains this choice; [improvement priorities](personal/WALKTHROUGH.md#10-improvement-priorities) records the need for an explicit censored-row or observation-boundary contract. Historical reconstruction is also limited by retained state, with degraded reasons after evidence is discarded.
