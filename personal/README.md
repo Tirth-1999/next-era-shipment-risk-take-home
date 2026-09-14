@@ -90,3 +90,23 @@ The same server serves the nine-slide interview deck at `http://127.0.0.1:8765/p
 Use arrow keys or Previous/Next to navigate, the slide picker to jump, **F** for fullscreen, and **N** for speaker notes. Notes appear below the slide on the same page; hide them before sharing the screen. A slide URL such as `/presentation#slide-6` can be bookmarked. **Live demo** returns to `/`.
 
 Text, tables, colors and speaker notes are exported from `personal/outputs/presentation/Shipment_Risk_Interview.pptx`. After updating that deck, run `python personal/tools/export_presentation.py` to regenerate `personal/demo/presentation.html` and `personal/demo/presentation-slides.css`. The exporter supports the text boxes and tables in this deck and rejects unsupported shapes; it is not a general PowerPoint converter. Fonts are supplied by the browser, so line wrapping can differ slightly from PowerPoint.
+
+## Run the notebooks
+
+Install the notebook dependencies with `uv sync --extra dev --extra notebook --extra demo`. Open notebooks under `personal/notebooks/` in numerical order. In your editor's kernel picker, choose the Python interpreter at this repository's `.venv/bin/python`; the displayed kernel label alone does not confirm the interpreter. Check `import sys; print(sys.executable)` in a cell if unsure.
+
+For an external Jupyter installation, register the project interpreter once:
+
+```bash
+.venv/bin/python -m ipykernel install --user --name dispatch-risk --display-name "Shipment risk (.venv)"
+```
+
+Then select **Shipment risk (.venv)**. Repeat registration if the repository or environment moves. Notebooks locate the repository from the current folder's ancestors. Raw inputs remain in `data/`; tables and learning artifacts go under `personal/`. Later notebooks explicitly import `src/` and the moved support folder.
+
+To check every notebook with this environment in a temporary copy:
+
+```bash
+.venv/bin/python personal/tools/check_notebooks.py
+```
+
+The checker runs all 14 notebooks in order with fresh kernels and stops on the first error. It leaves the saved notebooks, tables and model artifacts unchanged. Allow roughly a minute locally; runtime depends on the machine.

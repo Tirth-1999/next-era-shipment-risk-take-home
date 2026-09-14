@@ -150,3 +150,7 @@ The added runbook also belongs to personal preparation and now lives at `persona
 Removed generated Python caches and installation metadata from Git tracking; these are recreated locally. Consolidated improvement priorities into the walkthrough and made FastAPI the single documented full-demo startup. Retained notebooks, exported tables and saved experiment results because they preserve the learning and reproducibility record.
 
 Documentation consolidation: combined the runbook and demo guide into `personal/README.md`. Use it for commands and `WALKTHROUGH.md` for rehearsal; this journal and the plan retain development history.
+
+## Checkpoint 24: verify notebooks after relocation
+
+Audited paths after the move to `personal/`. Notebooks 11–14 now add repository `src/` explicitly before importing shared helpers. A kernel's display label does not establish its Python executable; use the project `.venv` interpreter. Added a temporary-copy checker that executes every notebook in a fresh kernel, including training and fresh-process artifact checks. All 14 notebooks and 28 core/demo tests passed. Saved submission artifacts were not regenerated.
